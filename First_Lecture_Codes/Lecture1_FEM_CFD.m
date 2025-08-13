@@ -45,12 +45,13 @@ rightHandSide_cvec     = zeros(numberOfNodes,1);
 for  i = 1:length(boundaryConditionsNodes_vec)
     
     nodeNumber = boundaryConditionsNodes_vec(i);
-    temp = globalMatrix_mat(nodeNumber,nodeNumber);   % temporary value holding 
-    rightHandSide_cvec(:,1) = rightHandSide_cvec(:,1) + abs(globalMatrix_mat(:,nodeNumber)) * boundaryConditionsValues_vec(i) ;
-    globalMatrix_mat(:,nodeNumber)          = 0;
+    temp = globalMatrix_mat(nodeNumber,nodeNumber);   
     globalMatrix_mat(nodeNumber,:)          = 0;
+    rightHandSide_cvec(:,1) = rightHandSide_cvec(:,1) -  globalMatrix_mat(:,nodeNumber) * boundaryConditionsValues_vec(i) ;
+    globalMatrix_mat(:,nodeNumber)          = 0;
     globalMatrix_mat(nodeNumber,nodeNumber) = temp;
-
+    rightHandSide_cvec(nodeNumber,1) = temp * boundaryConditionsValues_vec(i);
+    
 end
 
 temperatureSolution_cvec = globalMatrix_mat \ rightHandSide_cvec
