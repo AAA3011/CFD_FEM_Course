@@ -6,11 +6,12 @@ d = 2;
 numElements1X = 30;
 numElements1Y = 30;
 
+tolerance = 1e-10;
 lengthX_vec        = [2*d d];
 lengthY_vec        = [d d*0.1];
 numElementsX_vec   = [numElements1X floor((lengthX_vec(2)/lengthX_vec(1))*numElements1X)];
 numElementsY_vec   = [numElements1Y floor((lengthY_vec(2)/lengthY_vec(1))*numElements1Y)];
-xMin_vec           = [0 lengthX_vec(1)];
+xMin_vec           = [0 lengthX_vec(1)+tolerance];
 yMin_vec           = [0 0];
 totNumNodes_vec    = (numElementsX_vec+1) .* (numElementsY_vec+1);
 
