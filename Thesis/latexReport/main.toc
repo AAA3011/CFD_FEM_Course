@@ -1,0 +1,22 @@
+\contentsline {section}{\numberline {1}Problem Description}{2}{}%
+\contentsline {section}{\numberline {2}Numerical Method}{3}{}%
+\contentsline {subsection}{\numberline {2.1}Weak Formulation}{3}{}%
+\contentsline {subsection}{\numberline {2.2}Finite Element Approximation}{3}{}%
+\contentsline {subsection}{\numberline {2.3}Spatial Discretization}{4}{}%
+\contentsline {subsection}{\numberline {2.4}Numerical Quadrature and Mapping}{4}{}%
+\contentsline {subsection}{\numberline {2.5}Boundary Conditions}{4}{}%
+\contentsline {section}{\numberline {3}Error Norms}{5}{}%
+\contentsline {subsection}{\numberline {3.1}Computation of Error Norms}{5}{}%
+\contentsline {subsection}{\numberline {3.2}Theoretical Error Estimates}{6}{}%
+\contentsline {section}{\numberline {4}Results and Discussion}{7}{}%
+\contentsline {subsection}{\numberline {4.1}Mesh}{7}{}%
+\contentsline {subsection}{\numberline {4.2}Numerical and Exact Solutions}{8}{}%
+\contentsline {subsection}{\numberline {4.3}3D Surface View}{9}{}%
+\contentsline {subsection}{\numberline {4.4}Pointwise Comparison}{10}{}%
+\contentsline {subsection}{\numberline {4.5}Isoparametric Norms}{11}{}%
+\contentsline {subsubsection}{\numberline {4.5.1}$L^2$ Norm}{11}{}%
+\contentsline {subsubsection}{\numberline {4.5.2}$H^1$ Norm}{12}{}%
+\contentsline {subsection}{\numberline {4.6}Subparametric Norms}{13}{}%
+\contentsline {subsubsection}{\numberline {4.6.1}$L^2$ Norm}{13}{}%
+\contentsline {subsubsection}{\numberline {4.6.2}$H^1$ Norm}{14}{}%
+\contentsline {subsection}{\numberline {4.7}h-refinement vs p-refinement}{15}{}%
