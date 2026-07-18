@@ -1,3 +1,21 @@
+% structuredMesh - Create structured quadrilateral mesh.
+%
+% FILE: structuredMesh.m
+% DESCRIPTION:
+% Generate a structured bilinear quadrilateral mesh over a rectangular
+% domain and return element connectivity and nodal coordinates.
+%
+% Inputs:
+%   numElementsX (variable): Number of elements in the x-direction.
+%   numElementsY (variable): Number of elements in the y-direction.
+%   lengthX (variable): Total domain length in the x-direction.
+%   lengthY (variable): Total domain length in the y-direction.
+%   xMin (variable): Minimum x-coordinate of the mesh domain.
+%   yMin (variable): Minimum y-coordinate of the mesh domain.
+% Outputs:
+%   connectivityMatrix_mat : Element connectivity matrix (nElements x nodesPerElement)
+%   xCoord_vec : Nodal x-coordinates of the mesh.
+%   yCoord_vec : Nodal y-coordinates of the mesh.
 function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin)
 
     %% Connectivity Matrixs

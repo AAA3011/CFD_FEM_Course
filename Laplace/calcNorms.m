@@ -1,22 +1,33 @@
-function [L2_norm,H1_norm] = calcNorms(uSolution_cvec,connectivityMatrix_mat,connectivityMatrixGeo_mat,totNumElements,xCoordGeo_vec,yCoordGeo_vec,n_ElementType,n_GeometryElementType,order,order_G,numGeometryGaussPoints,numGaussPoints,xCoord_vec,yCoord_vec)
+% calcNorms - Calc Norms.
+%
+% FILE: calcNorms.m
+% DESCRIPTION:
+% Compute discrete L2 and H1 norms (error norms) between the FEM solution
+% and the analytical exact solution using Gauss quadrature over elements.
+%
+% Inputs:
+%   uSolution_cvec (column vector): Nodal u-velocity values for the current field.
+%   totNumElements (variable): Total number of elements in the mesh.
+%   elementData (variable): Struct with precomputed element integration data (weights, shape functions, derivatives, physCoords)
+% Outputs:
+%   L2_norm : Discrete L2 error norm of the FEM solution over the domain.
+%   H1_norm : Discrete H1 error norm of the FEM solution over the domain.
+function [L2_norm,H1_norm] = calcNorms(uSolution_cvec,totNumElements,elementData)
 
     L2_integral = 0;
     H1_integral = 0;
 
     for eleNum = 1:totNumElements
 
-        elementNodes_vec = connectivityMatrix_mat(eleNum,:);
-        xNodesVals_vec   = xCoord_vec(elementNodes_vec);
-        yNodesVals_vec   = yCoord_vec(elementNodes_vec);
+        elementNodes_vec = elementData{eleNum}.Nodes;
+        xNodesVals_vec   = elementData{eleNum}.xNodesVals_vec;
+        yNodesVals_vec   = elementData{eleNum}.yNodesVals_vec;
 
-        elementNodesGeo_vec = connectivityMatrixGeo_mat(eleNum,:);
-        xNodesValsGeo_vec   = xCoordGeo_vec(elementNodesGeo_vec);
-        yNodesValsGeo_vec   = yCoordGeo_vec(elementNodesGeo_vec);
-
-        [weights_pages,N_row_points_pages,~,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,~] = getGaussRelated(xNodesValsGeo_vec,yNodesValsGeo_vec,n_ElementType,numGaussPoints,n_GeometryElementType,numGeometryGaussPoints,order,order_G);
-        
-        dNdX_vec_pages = N_diff_PhysCoords_points_rows_pages(1, :, :);
-        dNdY_vec_pages = N_diff_PhysCoords_points_rows_pages(2, :, :);
+        weights_pages      = elementData{eleNum}.weights;
+        N_row_points_pages = elementData{eleNum}.N_row;
+        J_det_points_elev  = elementData{eleNum}.J_det;
+        dNdX_vec_pages     = elementData{eleNum}.dNdX;
+        dNdY_vec_pages     = elementData{eleNum}.dNdY;
 
         % Physical coordinates at Gauss points: sum over geometry nodes
         xNodes_row = xNodesVals_vec';

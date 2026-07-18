@@ -1,201 +1,120 @@
+% quad4_to_quadHigh - Convert Quad4 mesh to higher-order quadrilateral mesh.
+%
+% FILE: quad4_to_quadHigh.m
+% DESCRIPTION:
+% Convert a bilinear 4-node quadrilateral mesh to a higher-order
+% quadrilateral mesh (Q_p) by inserting edge and interior nodes and
+% returning updated connectivity and coordinates.
+%
+% Inputs:
+%   quad4_conn (variable): Connectivity matrix
+%   xCoord (variable): Vector of x-coordinates.
+%   yCoord (variable): Vector of y-coordinates.
+%   order (variable): Polynomial order of the solution element basis.
+% Outputs:
+%   quadN_conn : Connectivity matrix
+%   xCoordN : Vector of x-coordinates.
+%   yCoordN : Vector of y-coordinates.
 function [quadN_conn, xCoordN, yCoordN] = quad4_to_quadHigh(quad4_conn, xCoord, yCoord, order)
-% QUAD4_TO_QUADN Convert Quad4 mesh to Q_p (order) elements
-%   [quadN_conn, xCoordN, yCoordN] = quad4_to_quadN(quad4_conn, xCoord, yCoord, order)
-% ... (same header as before) ...
 
-    % --- validate inputs -------------------------------------------------
-    if nargin < 4
-        error('Must provide quad4_conn, xCoord, yCoord, and order (p).');
-    end
+    if nargin < 4, error('Need: quad4_conn, xCoord, yCoord, order'); end
     p = double(order);
-    if p < 1 || p ~= floor(p)
-        error('order must be an integer >= 1');
-    end
+    if p < 1 || p ~= floor(p), error('order must be integer >= 1'); end
 
-    nelem = size(quad4_conn,1);
-    nnode_original = length(xCoord(:));
+    nE   = size(quad4_conn, 1);
+    nN   = numel(xCoord);
+    nPE  = (p+1)^2;                          % nodes per element
 
-    % Number of nodes per Q_p element
-    nodes_per_elem = (p+1)^2;
+    % Pre-allocate coords, copy originals
+    cap      = nN + nE*((p-1)^2 + 4*(p-1));
+    xCoordN  = [xCoord(:); nan(cap - nN, 1)];
+    yCoordN  = [yCoord(:); nan(cap - nN, 1)];
+    nextNode = nN + 1;
 
-    % Pre-estimate max new nodes to preallocate (safe upper bound)
-    max_new_nodes = nnode_original + nelem*( (p-1)^2 + 4*(p-1) + 1 );
-    xCoordN = nan(max_new_nodes,1);
-    yCoordN = nan(max_new_nodes,1);
-    % copy originals
-    xCoordN(1:nnode_original) = xCoord(:);
-    yCoordN(1:nnode_original) = yCoord(:);
-    current_node = nnode_original + 1;
+    quadN_conn = zeros(nE, nPE);
+    edgeMap    = containers.Map('KeyType','char','ValueType','double');
 
-    % initialize connectivity
-    quadN_conn = zeros(nelem, nodes_per_elem);
+    % Bilinear map: reference (xi,eta) in [-1,1]x[-1,1] -> physical (x,y)
+    % Standard shape functions, corners CCW: 1(-1,-1) 2(1,-1) 3(1,1) 4(-1,1)
+    bmap = @(xi,eta, x1,x2,x3,x4, y1,y2,y3,y4) deal( ...
+        0.25*(1-xi).*(1-eta).*x1 + 0.25*(1+xi).*(1-eta).*x2 + 0.25*(1+xi).*(1+eta).*x3 + 0.25*(1-xi).*(1+eta).*x4, ...
+        0.25*(1-xi).*(1-eta).*y1 + 0.25*(1+xi).*(1-eta).*y2 + 0.25*(1+xi).*(1+eta).*y3 + 0.25*(1-xi).*(1+eta).*y4 );
 
-    % edge-map to reuse edge nodes: key = 'min-max-k' where k indexes position along edge
-    edge_map = containers.Map('KeyType','char','ValueType','double');
+    for e = 1:nE
+        c = quad4_conn(e,:);                  % 4 corner node indices (CCW)
+        quadN_conn(e,1:4) = c;
+        [x1,x2,x3,x4] = deal(xCoord(c(1)), xCoord(c(2)), xCoord(c(3)), xCoord(c(4)));
+        [y1,y2,y3,y4] = deal(yCoord(c(1)), yCoord(c(2)), yCoord(c(3)), yCoord(c(4)));
+        pos = 5;
 
-    fprintf('Converting %d Quad4 elements to Q_%d (%d nodes/elem)...\n', nelem, p, nodes_per_elem);
-
-    % reference corner local coords (xi,eta) for corners in the same CCW order as input:
-    % corner 1 -> (0,0), 2 -> (1,0), 3 -> (1,1), 4 -> (0,1)
-    corner_ref = [0,0; 1,0; 1,1; 0,1];
-
-    % loop elements
-    for elem = 1:nelem
-        corners = quad4_conn(elem, :);   % indices to original nodes (1x4), CCW
-
-        % store corner node indices into connectivity first (positions 1..4)
-        quadN_conn(elem,1:4) = corners;
-
-        % convenience: corner coordinates
-        x1 = xCoord(corners(1)); y1 = yCoord(corners(1));
-        x2 = xCoord(corners(2)); y2 = yCoord(corners(2));
-        x3 = xCoord(corners(3)); y3 = yCoord(corners(3));
-        x4 = xCoord(corners(4)); y4 = yCoord(corners(4));
-
-        % Build list of (xi,eta) and decide whether node is corner/edge/interior
-        % We'll assign ordering as:
-        %  1..4 corners (given)
-        %  then edges: edge 1 (1->2) nodes at xi = k/p, eta=0 (k=1..p-1)
-        %              edge 2 (2->3) xi=1, eta=k/p
-        %              edge 3 (3->4) xi = 1 - k/p, eta=1  (to go 3->4 CCW)
-        %              edge 4 (4->1) xi=0, eta = 1 - k/p
-        %  then interior nodes: now ordered in CCW concentric rings.
-
-        % Keep a local position pointer for connectivity positions
-        pos = 5; % next position after corners (1..4)
-
-        % --- edges -------------------------------------------------------
-        % define edge endpoint indices in the element (index into 'corners')
-        edge_pairs = [1,2; 2,3; 3,4; 4,1];
-
+        % ---- Edge nodes (shared between adjacent elements) ----
+        % Edge param t=k/p in (0,1), rescaled to s=2t-1 in (-1,1)
+        % direction: edge1(eta=-1), edge2(xi=1), edge3(eta=1,reversed), edge4(xi=-1,reversed)
+        edgePairs = [1,2; 2,3; 3,4; 4,1];
         for edge = 1:4
-            idxA = edge_pairs(edge,1);
-            idxB = edge_pairs(edge,2);
-            nodeA_idx = corners(idxA);
-            nodeB_idx = corners(idxB);
-
+            nA = c(edgePairs(edge,1));  nB = c(edgePairs(edge,2));
             for k = 1:(p-1)
-                % local param t along the edge from nodeA to nodeB
-                t = k / p;
-
-                % compute reference (xi,eta) depending on edge, preserving CCW local direction
+                t = k/p;
+                s = 2*t - 1;
                 switch edge
-                    case 1 % 1->2 : eta=0, xi=t
-                        xi = t; eta = 0;
-                    case 2 % 2->3 : xi=1, eta=t
-                        xi = 1; eta = t;
-                    case 3 % 3->4 : eta=1, xi = 1 - t  (3->4)
-                        xi = 1 - t; eta = 1;
-                    case 4 % 4->1 : xi=0, eta = 1 - t  (4->1)
-                        xi = 0; eta = 1 - t;
+                    case 1, xi=s;   eta=-1;
+                    case 2, xi=1;   eta=s;
+                    case 3, xi=-s;  eta=1;
+                    case 4, xi=-1;  eta=-s;
                 end
 
-                % Determine unique edge key so two adjacent elements share the same node.
-                % Key uses sorted endpoints plus a k_key that counts from min_node->max_node.
-                minnode = min(nodeA_idx, nodeB_idx);
-                maxnode = max(nodeA_idx, nodeB_idx);
-                if nodeA_idx < nodeB_idx
-                    k_key = k; % same orientation as min->max
+                % Canonical edge key: always ordered min->max node, k_key counts from min end
+                k_key = k; if nA > nB, k_key = p-k; end
+                key = sprintf('%d-%d-%d', min(nA,nB), max(nA,nB), k_key);
+
+                if isKey(edgeMap, key)
+                    nid = edgeMap(key);
                 else
-                    k_key = p - k; % reversed orientation
+                    [xp, yp] = bmap(xi,eta, x1,x2,x3,x4, y1,y2,y3,y4);
+                    nid = nextNode;
+                    xCoordN(nid) = xp;  yCoordN(nid) = yp;
+                    edgeMap(key) = nid;
+                    nextNode = nextNode + 1;
                 end
-                key = sprintf('%d-%d-%d', minnode, maxnode, k_key);
-
-                if isKey(edge_map, key)
-                    nid = edge_map(key);
-                else
-                    % compute physical coordinates via bilinear mapping
-                    x_phys = (1 - xi)*(1 - eta)*x1 + xi*(1 - eta)*x2 + xi*eta*x3 + (1 - xi)*eta*x4;
-                    y_phys = (1 - xi)*(1 - eta)*y1 + xi*(1 - eta)*y2 + xi*eta*y3 + (1 - xi)*eta*y4;
-
-                    nid = current_node;
-                    xCoordN(nid) = x_phys;
-                    yCoordN(nid) = y_phys;
-                    edge_map(key) = nid;
-                    current_node = current_node + 1;
-                end
-
-                quadN_conn(elem, pos) = nid;
-                pos = pos + 1;
+                quadN_conn(e, pos) = nid;  pos = pos + 1;
             end
         end
 
-        % --- interior nodes (now created and ordered in CCW concentric rings) ----------
-        m = p - 1;  % interior grid size (m x m)
+        % ---- Interior nodes in CCW concentric rings ----
+        m = p-1;
         if m > 0
-            % create interior node id grid: indices i=1..m (xi left->right), j=1..m (eta bottom->top)
-            interior_ids = zeros(m,m);
-
-            % First create all interior nodes and store their ids in the grid
-            for j = 1:m         % eta = j/p (bottom->top)
-                eta = j / p;
-                for i = 1:m     % xi = i/p (left->right)
-                    xi = i / p;
-                    % bilinear map for interior node
-                    x_phys = (1 - xi)*(1 - eta)*x1 + xi*(1 - eta)*x2 + xi*eta*x3 + (1 - xi)*eta*x4;
-                    y_phys = (1 - xi)*(1 - eta)*y1 + xi*(1 - eta)*y2 + xi*eta*y3 + (1 - xi)*eta*y4;
-
-                    nid = current_node;
-                    xCoordN(nid) = x_phys;
-                    yCoordN(nid) = y_phys;
-                    current_node = current_node + 1;
-
-                    interior_ids(i,j) = nid; % store by (i=xi, j=eta)
+            % Create all interior nodes on an m×m grid (i=xi-index, j=eta-index)
+            ids = zeros(m,m);
+            for j = 1:m
+                for i = 1:m
+                    xi_ij  = 2*(i/p) - 1;
+                    eta_ij = 2*(j/p) - 1;
+                    [xp, yp] = bmap(xi_ij, eta_ij, x1,x2,x3,x4, y1,y2,y3,y4);
+                    ids(i,j) = nextNode;
+                    xCoordN(nextNode) = xp;  yCoordN(nextNode) = yp;
+                    nextNode = nextNode + 1;
                 end
             end
 
-            % Now output the interior node ids in CCW concentric rings:
-            rings = ceil(m/2);
-            for r = 1:rings
-                left = r;
-                right = m - r + 1;
-                bottom = r;
-                top = m - r + 1;
-
-                if left == right && bottom == top
-                    % single center node
-                    quadN_conn(elem, pos) = interior_ids(left, bottom);
-                    pos = pos + 1;
+            % Walk rings from outside in, CCW: bottom→right→top→left
+            for r = 1:ceil(m/2)
+                L=r; R=m-r+1; B=r; T=m-r+1;
+                if L==R && B==T                           % single center node
+                    quadN_conn(e,pos) = ids(L,B);  pos = pos+1;
                 else
-                    % 1) bottom row, left->right (i = left..right, j = bottom)
-                    for i = left:right
-                        quadN_conn(elem, pos) = interior_ids(i, bottom);
-                        pos = pos + 1;
-                    end
-                    % 2) right column, bottom+1 .. top (j increases)
-                    for j = bottom+1:top
-                        quadN_conn(elem, pos) = interior_ids(right, j);
-                        pos = pos + 1;
-                    end
-                    % 3) top row, right-1 .. left (i decreases) only if top != bottom
-                    if top ~= bottom
-                        for i = (right-1):-1:left
-                            quadN_conn(elem, pos) = interior_ids(i, top);
-                            pos = pos + 1;
-                        end
-                    end
-                    % 4) left column, top-1 .. bottom+1 (j decreases) only if left ~= right
-                    if left ~= right
-                        for j = (top-1):-1:(bottom+1)
-                            quadN_conn(elem, pos) = interior_ids(left, j);
-                            pos = pos + 1;
-                        end
-                    end
+                    for i = L:R,        quadN_conn(e,pos) = ids(i,B); pos=pos+1; end  % bottom L→R
+                    for j = B+1:T,      quadN_conn(e,pos) = ids(R,j); pos=pos+1; end  % right  B→T
+                    if T~=B, for i = R-1:-1:L,  quadN_conn(e,pos) = ids(i,T); pos=pos+1; end; end  % top R→L
+                    if L~=R, for j = T-1:-1:B+1, quadN_conn(e,pos) = ids(L,j); pos=pos+1; end; end % left T→B
                 end
             end
         end
 
-        if pos - 1 ~= nodes_per_elem
-            error('Unexpected node count per element constructed for element %d', elem);
-        end
+        assert(pos-1 == nPE, 'Node count mismatch in element %d', e);
     end
 
-    % trim coordinate arrays
-    last_node = current_node - 1;
-    xCoordN = xCoordN(1:last_node);
-    yCoordN = yCoordN(1:last_node);
+    % Trim to actual node count
+    xCoordN = xCoordN(1:nextNode-1);
+    yCoordN = yCoordN(1:nextNode-1);
 
-    fprintf('Conversion complete!\n');
-    fprintf('Original nodes: %d\n', nnode_original);
-    fprintf('New nodes: %d\n', last_node);
 end

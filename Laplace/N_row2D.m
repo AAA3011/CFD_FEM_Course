@@ -1,3 +1,17 @@
+% N_row2D - Compute 1D/2D Lagrange shape function values.
+%
+% FILE: N_row2D.m
+% DESCRIPTION:
+% Evaluate 2D tensor-product Lagrange shape functions at given natural
+% coordinates by multiplying 1D shape values in xi and eta directions.
+%
+% Inputs:
+%   K (variable): Number of nodes per element side for the solution element (K = order+1).
+%   ind_i (variable): Row index array for tensor-product Lagrange shape functions.
+%   ind_j (variable): Column index array for tensor-product Lagrange shape functions.
+%   naturalCoords_row_pages (variable): Vector of physical coordinates.
+% Outputs:
+%   none
 function N_row_pages=N_row2D(K,ind_i,ind_j,naturalCoords_row_pages)
     xi_elev=naturalCoords_row_pages(1,1,:);
     eta_elev=naturalCoords_row_pages(1,2,:);
