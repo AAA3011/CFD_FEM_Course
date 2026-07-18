@@ -1,3 +1,15 @@
+% N_diff2_rows - Compute derivatives of Lagrange shape functions.
+%
+% FILE: N_diff2_rows.m
+% DESCRIPTION:
+% Compute second derivatives of 1D Lagrange basis functions evaluated at
+% given reference coordinates. For linear elements this returns zeros.
+%
+% Inputs:
+%   K (variable): Number of nodes per element side for the solution element (K = order+1).
+%   xi_elev (variable): Natural coordinate evaluation points along the xi direction.
+% Outputs:
+%   none
 function N_diff2_row_pages = N_diff2_rows(K,xi_elev)
     N_points = size(xi_elev,3); % number of points at which shape functions are to be computed
     xi_i_row = linspace(-1,1,K);

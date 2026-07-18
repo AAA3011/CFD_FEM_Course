@@ -1,29 +1,54 @@
+% main - Main simulation driver.
+%
+%
+% Main simulation driver for 2D incompressible lid-driven cavity flow.
+% Sets solver parameters, builds mesh and element data, runs the time-stepping
+% loop, and saves results and diagnostics to files.
+%
+% Inputs: script parameters (Re, timeStep, totitrs, vtkOutputInterval, outputFolder).
+% Outputs: MAT files and VTK files saved to `outputFolder` (velocity, pressure,
+% diagnostics, time series).
+%
+% Syntax: main()
+%
+% Inputs: none
+%
+% Outputs: none
+%
+
 clc;clearvars;close all;
 tic
+
 %% Element informations
 numGaussPoints  = 10;
 numGeometryGaussPoints = numGaussPoints;
 
+D = 2;
+
 order   = 1;                % Order of Solution Element
-K       = (order + 1)^2;    % Solution Element number of nodes (has to be consistent with order of element specified below)
+K       = (order + 1)^D;    % Solution Element number of nodes (has to be consistent with order of element specified below)
 
 order_G = 1;                % Order of Geometric Element (Should be the same as Geometric meshing)
-K_G     = (order_G + 1)^2;  % Geometric Element number of nodes (has to be consistent with order of element specified below)
+K_G     = (order_G + 1)^D;  % Geometric Element number of nodes (has to be consistent with order of element specified below)
 
 %% Global Parameters
 Re        = 10;
 B         = 1/Re;
 timeStep  = 0.0005;
-totitrs   = 30;
+totitrs   = 1130;
+
+% Re = 10   -> totitres = 565   , timeStep = 0.001  , order 1, 40*40
+% Re = 100  -> totitrss = 1500  , timeStep = 0.0067 , order 1, 40*40
+% Re = 1000 -> totitrss = 40500 , timeStep = 0.001  , order 1, 26*26
 
 %% VTK file realated parameters
 vtkOutputInterval = 1000;
-outputFolder      = 'CavityResutts100ReHigher';
+outputFolder = sprintf('CavityResutsRe%dHigher', Re);
 makeVTKdir(outputFolder)
 
 %% Connectivity Matrix and Grid Generation
-numElementsX = 40;
-numElementsY = 40;
+numElementsX = 26;
+numElementsY = 26;
 numNodesX    = numElementsX + 1;
 numNodesY    = numElementsY + 1;
 
@@ -55,7 +80,10 @@ for eleNum = 1:numElements
     elementNodesGeo_vec = connectivityMatrixGeo_mat(eleNum,:);
     xNodesValsGeo_vec   = xCoordGeo_vec(elementNodesGeo_vec);
     yNodesValsGeo_vec   = yCoordGeo_vec(elementNodesGeo_vec);
+
     [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesValsGeo_vec,yNodesValsGeo_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
+    
+    elementData{eleNum}.Nodes      = connectivityMatrix_mat(eleNum,:);
     elementData{eleNum}.weights    = weights_pages;
     elementData{eleNum}.N_row      = N_row_points_pages;
     elementData{eleNum}.J_det      = J_det_points_elev;
@@ -96,7 +124,7 @@ uValsAll = [ ...
     ones(1,nnz(upperWallNoCorners_vec)), ...
     zeros(1,nnz(rightWallNoCorner_vec)), ...
     zeros(1,nnz(leftWallNoCorner_vec)), ...
-    0.5, 0.5];
+    1, 1];
 
 vNodesAll = uNodesAll;
 vValsAll  = zeros(size(vNodesAll));
@@ -121,12 +149,11 @@ pn_col(bc.pNodes) = bc.pVals;
 %% time Loop
 itr  = 1;
 time = 0;
-Diver_vec = [];
+
 while(itr < totitrs)
 
     %% Compute Delta Values
-    [Diver,unplus_col,vnplus_col,pnplus_col] = computeDeltaVals(numElements,totNumNodes,connectivityMatrix_mat,un_col,vn_col,pn_col,elementData,timeStep,Re,B,bc);
-    Diver_vec(itr) = Diver;
+    [unplus_col,vnplus_col,pnplus_col] = computeDeltaVals(numElements,totNumNodes,un_col,vn_col,pn_col,elementData,timeStep,Re,B,bc);
     %% Reassigning initial Conditions
     un_col  = unplus_col;
     vn_col  = vnplus_col;
@@ -148,7 +175,7 @@ writeFinalVTK(xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pn_col,
 
 %% Plotting Code
 % variation of x-component of velocity
-pakdel_mat   = readmatrix('x_velocityVariationPakdel100Re.csv', 'FileType', 'text', 'Range', 'A1:B94');
+pakdel_mat   = readmatrix('x_velocityVariationPakdel10Re.csv', 'FileType', 'text', 'Range', 'A1:B94');
 xpakdel_vec  = pakdel_mat(:,1);
 ypakdel_vec  = pakdel_mat(:,2);
 
@@ -215,6 +242,12 @@ ylabel('y','Interpreter','latex');
 title('v-Velocity Contour Distribution','Interpreter','latex');
 grid on;
 
-%% Divervence Plotting
-figure;
-plot(1:totitrs-1,Diver_vec)
+
+Re_tag = Re;   % uses the Re variable already defined in main.m
+
+save(sprintf('cavity_implicit_Re%d.mat', Re_tag), ...
+    'xCoord_vec', 'yCoord_vec', ...   % nodal coordinates (high-order mesh)
+    'un_col', 'vn_col', 'pn_col', ... % converged velocity and pressure
+    'connectivityMatrix_mat', ...     % element connectivity
+    'Re', 'timeStep', 'time', ...     % run parameters
+    'numElementsX', 'numElementsY', 'order');

@@ -1,3 +1,21 @@
+% newVTK - Write VTK output files.
+%
+% FILE: newVTK.m
+% DESCRIPTION:
+% Write mesh and field data into a VTK (ASCII) file for ParaView/visual-
+% ization. Handles linear and some higher-order element subdivision.
+%
+% Inputs:
+%   xCoord_vec (column vector): Nodal x-coordinates of the mesh.
+%   yCoord_vec (column vector): Nodal y-coordinates of the mesh.
+%   un_cvec (column vector): Nodal u-velocity values for the current field.
+%   vn_cvec (column vector): Nodal v-velocity values for the current field.
+%   connectivityMatrix_mat (matrix): Element connectivity matrix (nElements x nodesPerElement)
+%   pressureSolution_cvec (column vector): Nodal pressure values for the current field.
+%   filename (variable): Output file name (string).
+%   time (variable): Time step (scalar)
+% Outputs:
+%   none
 function newVTK(xCoord_vec, yCoord_vec, un_cvec, vn_cvec, connectivityMatrix_mat, pressureSolution_cvec, filename, time)
     % Prepare data for export
     xNodes = xCoord_vec;

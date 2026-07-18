@@ -1,32 +1,44 @@
-function [gaussPoints_cvec,gaussWeights_cvec] = gaussLegendreQuad(numGaussPoints)
+% gaussLegendreQuad - Return GaussLegendre points and weights.
+%
+% FILE: gaussLegendreQuad.m
+% DESCRIPTION:
+% Return Gauss-Legendre quadrature points and weights for a requested
+% number of Gauss points (supports common orders: 1,2,3,4,5,9,10,20).
+%
+% Inputs:
+%   numGaussPoints (variable): Number of Gauss points used per dimension
+% Outputs:
+%   gaussPoints_col : Gauss-Legendre quadrature points on [-1,1].
+%   gaussWeights_col : Gauss-Legendre quadrature weights.
+function [gaussPoints_col,gaussWeights_col] = gaussLegendreQuad(numGaussPoints)
     
     if numGaussPoints == 1
     
-        gaussPoints_cvec  = 0;
-        gaussWeights_cvec = 2;
+        gaussPoints_col  = 0;
+        gaussWeights_col = 2;
     
     elseif numGaussPoints == 2
     
-        gaussPoints_cvec  = [1/sqrt(3);-1/sqrt(3)];
-        gaussWeights_cvec = [1;1];
+        gaussPoints_col  = [1/sqrt(3);-1/sqrt(3)];
+        gaussWeights_col = [1;1];
     
     elseif numGaussPoints == 3
     
-        gaussPoints_cvec  = [0;sqrt(3/5);-sqrt(3/5)];
-        gaussWeights_cvec = [8/9;5/9;5/9];
+        gaussPoints_col  = [0;sqrt(3/5);-sqrt(3/5)];
+        gaussWeights_col = [8/9;5/9;5/9];
     
     elseif numGaussPoints == 4
     
-        gaussPoints_cvec  = [sqrt(3/7 - 2/7 * sqrt(6/5));-sqrt(3/7 - 2/7 * sqrt(6/5));sqrt(3/7 + 2/7 * sqrt(6/5));-sqrt(3/7 + 2/7 * sqrt(6/5))];
-        gaussWeights_cvec = [(18+sqrt(30))/36;(18+sqrt(30))/36;(18-sqrt(30))/36;(18-sqrt(30))/36];
+        gaussPoints_col  = [sqrt(3/7 - 2/7 * sqrt(6/5));-sqrt(3/7 - 2/7 * sqrt(6/5));sqrt(3/7 + 2/7 * sqrt(6/5));-sqrt(3/7 + 2/7 * sqrt(6/5))];
+        gaussWeights_col = [(18+sqrt(30))/36;(18+sqrt(30))/36;(18-sqrt(30))/36;(18-sqrt(30))/36];
     
     elseif numGaussPoints == 5
     
-        gaussPoints_cvec  = [0;1/3 * sqrt(5 - 2 * sqrt(10/7));-1/3 * sqrt(5 - 2 * sqrt(10/7));1/8 * sqrt(5 + 2 * sqrt(10/7));-1/8 * sqrt(5 + 2 * sqrt(10/7))];
-        gaussWeights_cvec = [128/225; (322 + 13*sqrt(70))/900;(322 + 13*sqrt(70))/900;(322 - 13*sqrt(70))/900;(322 - 13*sqrt(70))/900];
+        gaussPoints_col  = [0;1/3 * sqrt(5 - 2 * sqrt(10/7));-1/3 * sqrt(5 - 2 * sqrt(10/7));1/8 * sqrt(5 + 2 * sqrt(10/7));-1/8 * sqrt(5 + 2 * sqrt(10/7))];
+        gaussWeights_col = [128/225; (322 + 13*sqrt(70))/900;(322 + 13*sqrt(70))/900;(322 - 13*sqrt(70))/900;(322 - 13*sqrt(70))/900];
     elseif numGaussPoints == 9
     
-        gaussPoints_cvec = [ ...
+        gaussPoints_col = [ ...
             -0.968160239507626;
             -0.836031107326636;
             -0.613371432700590;
@@ -37,7 +49,7 @@ function [gaussPoints_cvec,gaussWeights_cvec] = gaussLegendreQuad(numGaussPoints
             0.836031107326636;
             0.968160239507626 ];
     
-        gaussWeights_cvec = [ ...
+        gaussWeights_col = [ ...
             0.081274388361574;
             0.180648160694857;
             0.260610696402935;
@@ -49,7 +61,7 @@ function [gaussPoints_cvec,gaussWeights_cvec] = gaussLegendreQuad(numGaussPoints
             0.081274388361574 ];
     elseif numGaussPoints == 10
     
-        gaussPoints_cvec = [
+        gaussPoints_col = [
             -0.973906528517172;
             -0.865063366688985;
             -0.679409568299024;
@@ -61,7 +73,7 @@ function [gaussPoints_cvec,gaussWeights_cvec] = gaussLegendreQuad(numGaussPoints
             0.865063366688985;
             0.973906528517172 ];
     
-        gaussWeights_cvec = [
+        gaussWeights_col = [
             0.066671344308688;
             0.149451349150581;
             0.219086362515982;
@@ -74,7 +86,7 @@ function [gaussPoints_cvec,gaussWeights_cvec] = gaussLegendreQuad(numGaussPoints
             0.066671344308688 ];
             elseif numGaussPoints == 20
     
-        gaussPoints_cvec = [
+        gaussPoints_col = [
             -0.9931285991850949;
             -0.9639719272779138;
             -0.9122344282513260;
@@ -96,7 +108,7 @@ function [gaussPoints_cvec,gaussWeights_cvec] = gaussLegendreQuad(numGaussPoints
              0.9639719272779138;
              0.9931285991850949 ];
     
-        gaussWeights_cvec = [
+        gaussWeights_col = [
             0.01761400713915212;
             0.04060142980038694;
             0.06267204833410906;
