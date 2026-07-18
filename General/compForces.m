@@ -7,24 +7,23 @@
 % averages stress at nodes, computes normal, and sums force contributions.
 %
 % Inputs:
-%   uxSolution_col (column vector):Nodal u-velocity solution values for the cylinder flow field.
-%   uySolution_col (column vector):Nodal u-velocity solution values for the cylinder flow field.
-%   vxSolution_col (column vector):Nodal v-velocity solution values for the cylinder flow field.
-%   pressureSolution_col (column vector): Nodal pressure column vector (N x 1)
-%   vySolution_col (column vector):Nodal v-velocity solution values for the cylinder flow field.
-%   xCoord_vec (column vector): Nodal x-coordinates of the mesh.
-%   yCoord_vec (column vector): Nodal y-coordinates of the mesh.
+%   uxSolution_col:Nodal ux-velocity solution values for the cylinder flow field.
+%   uySolution_col:Nodal uy-velocity solution values for the cylinder flow field.
+%   vxSolution_col:Nodal vx-velocity solution values for the cylinder flow field.
+%   vySolution_col:Nodal v-velocity solution values for the cylinder flow field.
+%   pressureSolution_col: Nodal pressure column vector (N x 1)
+%   x_col: Nodal x-coordinates of the mesh.
+%   y_col: Nodal y-coordinates of the mesh.
 %   cylinderWall_vec : Node indices on the cylinder wall boundary..
 %   Re (variable): Reynolds number (scalar)
 % Outputs:
 %   Fx : Computed total drag force in the x-direction.
 %   Fy : Computed total lift force in the y-direction.
-function  [Fx,Fy] = compForces(uxSolution_col,uySolution_col,vxSolution_col,pressureSolution_col,vySolution_col,xCoord_vec,yCoord_vec,cylinderWall_vec,Re)
+function  [Fx,Fy] = compForces(uxSolution_col,uySolution_col,vxSolution_col,vySolution_col,pressureSolution_col,x_col,y_col,cylinderWall_vec,Re)
     Fx_col  = zeros(length(cylinderWall_vec)-1,1);
     Fy_col  = zeros(length(cylinderWall_vec)-1,1);
-    
+
     for i = 1:length(cylinderWall_vec)-1
-        
         node1     = cylinderWall_vec(i);
         node2     = cylinderWall_vec(i+1);
 
@@ -43,10 +42,10 @@ function  [Fx,Fy] = compForces(uxSolution_col,uySolution_col,vxSolution_col,pres
         sigma21_avg = (sigma21_1+sigma21_2)/2;
         sigma22_avg = (sigma22_1+sigma22_2)/2;
 
-        x1 = xCoord_vec(node1);
-        x2 = xCoord_vec(node2);
-        y1 = yCoord_vec(node1);
-        y2 = yCoord_vec(node2);
+        x1 = x_col(node1);
+        x2 = x_col(node2);
+        y1 = y_col(node1);
+        y2 = y_col(node2);
 
         Le = sqrt((x2-x1)^2 + (y2-y1)^2);
 
@@ -58,5 +57,4 @@ function  [Fx,Fy] = compForces(uxSolution_col,uySolution_col,vxSolution_col,pres
     end
     Fx = sum(Fx_col);
     Fy = sum(Fy_col);
-
 end

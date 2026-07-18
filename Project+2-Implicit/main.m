@@ -81,7 +81,7 @@ for eleNum = 1:numElements
     xNodesValsGeo_vec   = xCoordGeo_vec(elementNodesGeo_vec);
     yNodesValsGeo_vec   = yCoordGeo_vec(elementNodesGeo_vec);
 
-    [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesValsGeo_vec,yNodesValsGeo_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
+    [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated_SubParametric(xNodesValsGeo_vec,yNodesValsGeo_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
     
     elementData{eleNum}.Nodes      = connectivityMatrix_mat(eleNum,:);
     elementData{eleNum}.weights    = weights_pages;

@@ -92,7 +92,7 @@ for eleNum = 1:numElements
     elementData{eleNum}.xNodesVals_vec   = xCoord_vec(elementData{eleNum}.Nodes);
     elementData{eleNum}.yNodesVals_vec   = yCoord_vec(elementData{eleNum}.Nodes);
     
-    [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementGeoCoords_mat] = getGaussRelated(elementData{eleNum}.xNodesGVals_vec,elementData{eleNum}.yNodesGVals_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
+    [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementGeoCoords_mat] = getGaussRelated_SubParametric(elementData{eleNum}.xNodesGVals_vec,elementData{eleNum}.yNodesGVals_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
 
     elementData{eleNum}.weights    = weights_pages;
     elementData{eleNum}.N_row      = N_row_points_pages;
@@ -138,9 +138,9 @@ xEqualHalf             =  xCoord_vec == lengthX/2;
 
 %% Prepare Pressure Global Matrix
 ind_vec                           = 1:length(xCoord_vec);
-pBCNodes_vec                      = ind_vec(pBCCondition_vec);
-pK_mat(pBCNodes_vec,:)            = 0;
-pK_mat(pBCNodes_vec,pBCNodes_vec) = eye(length(pBCNodes_vec));
+pBCNodes_col                      = ind_vec(pBCCondition_vec);
+pK_mat(pBCNodes_col,:)            = 0;
+pK_mat(pBCNodes_col,pBCNodes_col) = eye(length(pBCNodes_col));
 
 %% Initial Conditions
 un_col = zeros(totNumNodes,1);
@@ -152,7 +152,7 @@ time = 0;
 pK_mat  = decomposition(pK_mat);   % this line to enhance performance
 
 while(itr < totitrs)
-    pressureSolution_col = computePressure(elementData,connectivityMatrix_mat,pBCNodes_vec,pK_mat,totNumNodes,un_col,vn_col,epslon);
+    pressureSolution_col = computePressure(elementData,connectivityMatrix_mat,pBCNodes_col,pK_mat,totNumNodes,un_col,vn_col,epslon);
 
     uRHS_col    = zeros(totNumNodes,1);
     vRHS_col    = zeros(totNumNodes,1);

@@ -11,7 +11,7 @@
 %   none
 function pk_mat = calcLocal(elementData)
 
-    % [weights_pages,~,~,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,~] = getGaussRelated(xNodesValsGeo_vec,yNodesValsGeo_vec,n_ElementType,numGaussPoints,n_GeometryElementType,numGeometryGaussPoints,order,order_G);
+    % [weights_pages,~,~,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,~] = getGaussRelated_SubParametric(xNodesValsGeo_vec,yNodesValsGeo_vec,n_ElementType,numGaussPoints,n_GeometryElementType,numGeometryGaussPoints,order,order_G);
     
     dNdX_vec_pages    = elementData.dNdX;
     dNdY_vec_pages    = elementData.dNdY;

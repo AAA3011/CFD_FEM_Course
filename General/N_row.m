@@ -2,7 +2,8 @@
 %
 % FILE: N_row.m
 % DESCRIPTION:
-% Evaluate 1D Lagrange shape functions at given reference coordinates.
+% Compute 1D Lagrange shape function values at given natural coordinate
+% points for a set of nodes placed on the reference interval [-1,1].
 %
 % Inputs:
 %   K (variable): Number of nodes per element side for the solution element (K = order+1).
@@ -10,6 +11,7 @@
 % Outputs:
 %   none
 function N_row_pages=N_row(K,xi_elev)
+
     xi_i_row=linspace(-1,1,K);
     xi_i_row=xi_i_row([1,K,2:K-1]); % reordering nodes, because node 2 is always at the end
     N_row_tmp=(xi_elev-xi_i_row.')./(xi_i_row-xi_i_row.');

@@ -28,21 +28,21 @@ outputFolder      = 'Cylinder100Re';
 makeVTKdir(outputFolder)
 
 %% Reading Geometry and BC
-[connectivityMatrix_mat,xCoord_vec,yCoord_vec,top_vec,outlet_vec,inlet_vec,cylinderWall_vec,bottom_vec] = readGeoAndBC();
+[connectivityMatrix_mat,x_col,y_col,top_vec,outlet_vec,inlet_vec,cylinderWall_vec,bottom_vec] = readGeoAndBC();
 
 %% Precompute geometric data for all elements
 numGaussPoints = 5;
 n_ElementType  = 1;
 
 numElements    = size(connectivityMatrix_mat,1);
-totNumNodes    = length(xCoord_vec);
+totNumNodes    = length(x_col);
 elementData    = cell(numElements, 1);
 
 for eleNum = 1:numElements
 
     elementData{eleNum}.Nodes           = connectivityMatrix_mat(eleNum,:);
-    elementData{eleNum}.xNodesVals_vec  = xCoord_vec(elementData{eleNum}.Nodes);
-    elementData{eleNum}.yNodesVals_vec  = yCoord_vec(elementData{eleNum}.Nodes);
+    elementData{eleNum}.xNodesVals_vec  = x_col(elementData{eleNum}.Nodes);
+    elementData{eleNum}.yNodesVals_vec  = y_col(elementData{eleNum}.Nodes);
 
     [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(elementData{eleNum}.xNodesVals_vec,elementData{eleNum}.yNodesVals_vec,n_ElementType,numGaussPoints);
 
@@ -90,7 +90,7 @@ cnt = 0;
 for eleNum = 1:numElements
     elementNodes_vec = elementData{eleNum}.Nodes;
     [pk_mat,umlv_col,vmlv_col,mlv_col] = computeLocalNSP(elementData{eleNum});
-    
+
     % Generate grid indices matching the local matrix structure
     [R, C] = ndgrid(elementNodes_vec, elementNodes_vec);
     
@@ -111,11 +111,11 @@ end
 pK_mat = sparse(I, J, V, totNumNodes, totNumNodes);
 
 %% Prepare Pressure Global Matrix
-[~, localIdx]  = min(abs(yCoord_vec(outlet_vec)));
-pressureBC_vec = outlet_vec(localIdx);
+[~, localIdx]  = min(abs(y_col(outlet_vec)));
+pBCNodes_col = outlet_vec(localIdx);
 
-pK_mat(pressureBC_vec,:)              = 0;
-pK_mat(pressureBC_vec,pressureBC_vec) = eye(length(pressureBC_vec));
+pK_mat(pBCNodes_col,:)              = 0;
+pK_mat(pBCNodes_col,pBCNodes_col) = eye(length(pBCNodes_col));
 
 
 %% Initial Conditions and Time
@@ -133,7 +133,7 @@ Fy_col = zeros(totitrs,1);
 pK_mat  = decomposition(pK_mat);   % this line to enhance performance
 
 while(itr < totitrs)
-    pressureSolution_col = computePressure(elementData,numElements,pressureBC_vec,pK_mat,totNumNodes,un_col,vn_col,epslon);
+    pressureSolution_col = computePressure(elementData,numElements,pBCNodes_col,pK_mat,totNumNodes,un_col,vn_col,epslon);
 
     %% Initialize Matrices
     uRHS_col    = zeros(totNumNodes,1);
@@ -150,6 +150,7 @@ while(itr < totitrs)
     for elementNumber = 1:numElements
 
         elementNodes_vec           = elementData{elementNumber}.Nodes;
+
         unNodes_col                = un_col(elementNodes_vec,1);
         vnNodes_col                = vn_col(elementNodes_vec,1);
         pressureSolutionNodes_col  = pressureSolution_col(elementNodes_vec,1);
@@ -187,31 +188,31 @@ while(itr < totitrs)
     vMLV_col(bottom_vec)       = 1;
     vMLV_col(cylinderWall_vec) = 1;
 
-    %% u Solution
-    uSolution_col  = uRHS_col./uMLV_col;
+    %% Solve for u velocity
+    uSolution_col = uRHS_col./uMLV_col;
 
-    %% v Solution
-    vSolution_col  = vRHS_col./vMLV_col;
-    %% ux solution
-    uxSolution_col = uxRHS_col./MLV_col;
+    %% Solve for v velocity
+    vSolution_col = vRHS_col./vMLV_col;
+    %% Solve for ux
+    uxSolution_col= uxRHS_col./MLV_col;
 
-    %% uy solution
-    uySolution_col = uyRHS_col./MLV_col;
+    %% Solve for uy
+    uySolution_col= uyRHS_col./MLV_col;
 
-    %% vx solution
-    vxSolution_col = vxRHS_col./MLV_col;
+    %% Solve for vx
+    vxSolution_col= vxRHS_col./MLV_col;
 
-    %% vy solution
-    vySolution_col = vyRHS_col./MLV_col;
+    %% Solve for vy
+    vySolution_col= vyRHS_col./MLV_col;
 
     %% Forces
-    [Fx,Fy]     = compForces(uxSolution_col,uySolution_col,vxSolution_col,pressureSolution_col,vySolution_col,xCoord_vec,yCoord_vec,cylinderWall_vec,Re);
+    [Fx,Fy]     = compForces(uxSolution_col,uySolution_col,vxSolution_col,vySolution_col,pressureSolution_col,x_col,y_col,cylinderWall_vec,Re);
     Fx_col(itr) = Fx;
     Fy_col(itr) = Fy;
 
     %% Write VTK file at specified intervals
     if mod(itr, vtkOutputInterval) == 0
-        writeVTKatInterval(outputFolder,itr,xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time)
+        writeVTKatInterval(outputFolder,itr,x_col,y_col,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time)
     end
 
     %% Reassigning initial Conditions
@@ -231,6 +232,6 @@ outputFolder = 'Cylinder100Re';
 save(fullfile(outputFolder, 'results.mat'), 'Fx_col', 'Fy_col', 'un_col', 'vn_col', 'pressureSolution_col', 'time');
 
 %% Final VTK file
-writeFinalVTK(xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time,outputFolder)
+writeFinalVTK(x_col,y_col,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time,outputFolder)
 
 

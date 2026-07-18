@@ -71,7 +71,7 @@ for eleNum = 1:numElements
     elementData{eleNum}.xNodesVals_vec  = xCoord_vec(elementData{eleNum}.Nodes);
     elementData{eleNum}.yNodesVals_vec  = yCoord_vec(elementData{eleNum}.Nodes);
 
-    [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(elementData{eleNum}.xNodesValsGeo_vec,elementData{eleNum}.yNodesValsGeo_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
+    [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated_SubParametric(elementData{eleNum}.xNodesValsGeo_vec,elementData{eleNum}.yNodesValsGeo_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
 
 
     elementData{eleNum}.weights    = weights_pages;

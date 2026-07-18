@@ -5,7 +5,7 @@
 % Inputs:
 %   elementData (variable): Struct with precomputed element integration data (weights, shape functions, derivatives, physCoords)
 %   connectivityMatrix_mat (matrix): Element connectivity matrix (nElements x nodesPerElement)
-%   pBCNodes_vec (column vector): Indices of nodes with pressure Dirichlet BCs
+%   pBCNodes_col (column vector): Indices of nodes with pressure Dirichlet BCs
 %   pK_mat (matrix): Global pressure matrix (sparse)
 %   totNumNodes (variable): Total number of nodes (scalar)
 %   un_col (column vector): Nodal u-velocity column vector (N x 1)
@@ -13,7 +13,7 @@
 %   epslon (variable): Small penalty/stabilization parameter used in the pressure Poisson RHS.
 % Outputs:
 %   pressureSolution_col : Nodal pressure column vector (N x 1)
-function[pressureSolution_col] = computePressure(elementData,connectivityMatrix_mat,pBCNodes_vec,pK_mat,totNumNodes,un_col,vn_col,epslon)
+function[pressureSolution_col] = computePressure(elementData,connectivityMatrix_mat,pBCNodes_col,pK_mat,totNumNodes,un_col,vn_col,epslon)
 
 %% pRHS initialization
 pRHS_col = zeros(totNumNodes,1);
@@ -39,7 +39,7 @@ for eleNum = 1:size(connectivityMatrix_mat,1)
 end
 
 %% Pressure Boundary Conditions
-pRHS_col(pBCNodes_vec)  = 0;
+pRHS_col(pBCNodes_col)  = 0;
 
 %% Pressure Solution
 pressureSolution_col = pK_mat \ pRHS_col;

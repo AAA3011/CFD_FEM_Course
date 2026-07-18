@@ -2,16 +2,17 @@
 %
 % FILE: gaussLegendreQuad.m
 % DESCRIPTION:
-% Return Gauss-Legendre quadrature points and weights for a requested
-% number of Gauss points (supports common orders: 1,2,3,4,5,9,10,20).
+% Returns 1D Gauss-Legendre quadrature points and weights for integration
+% on reference interval [-1, 1]. Used to construct 2D quadrature rules via
+% tensor product for QUAD4 elements.
 %
 % Inputs:
 %   numGaussPoints (variable): Number of Gauss points used per dimension
 % Outputs:
-%   gaussPoints_col : Gauss-Legendre quadrature points on [-1,1].
-%   gaussWeights_col : Gauss-Legendre quadrature weights.
+%   gaussPoints_col : Column vector of Gauss-Legendre quadrature points on [-1,1].
+%   gaussWeights_col : Column vector of Gauss-Legendre quadrature weights.
 function [gaussPoints_col,gaussWeights_col] = gaussLegendreQuad(numGaussPoints)
-    
+
     if numGaussPoints == 1
     
         gaussPoints_col  = 0;
@@ -34,7 +35,7 @@ function [gaussPoints_col,gaussWeights_col] = gaussLegendreQuad(numGaussPoints)
     
     elseif numGaussPoints == 5
     
-        gaussPoints_col  = [0;1/3 * sqrt(5 - 2 * sqrt(10/7));-1/3 * sqrt(5 - 2 * sqrt(10/7));1/8 * sqrt(5 + 2 * sqrt(10/7));-1/8 * sqrt(5 + 2 * sqrt(10/7))];
+        gaussPoints_col  = [0;1/3 * sqrt(5 - 2 * sqrt(10/7));-1/3 * sqrt(5 - 2 * sqrt(10/7));1/3 * sqrt(5 + 2 * sqrt(10/7));-1/3 * sqrt(5 + 2 * sqrt(10/7))];
         gaussWeights_col = [128/225; (322 + 13*sqrt(70))/900;(322 + 13*sqrt(70))/900;(322 - 13*sqrt(70))/900;(322 - 13*sqrt(70))/900];
     elseif numGaussPoints == 9
     
