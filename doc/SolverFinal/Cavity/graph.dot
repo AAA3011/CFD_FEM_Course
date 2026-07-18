@@ -1,0 +1,21 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  getGaussRelated -> Jacobian;
+  getGaussRelated -> gaussLegendreQuad;
+  getGaussRelated -> shapeFunctions;
+  main -> computeLocalNS;
+  main -> computeLocalNSP;
+  main -> computePressure;
+  main -> getGaussRelated;
+  main -> structuredMesh;
+
+  Jacobian [URL="Jacobian.html"];
+  computeLocalNS [URL="computeLocalNS.html"];
+  computeLocalNSP [URL="computeLocalNSP.html"];
+  computePressure [URL="computePressure.html"];
+  gaussLegendreQuad [URL="gaussLegendreQuad.html"];
+  getGaussRelated [URL="getGaussRelated.html"];
+  main [URL="main.html"];
+  shapeFunctions [URL="shapeFunctions.html"];
+  structuredMesh [URL="structuredMesh.html"];
+}

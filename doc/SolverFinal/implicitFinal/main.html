@@ -1,0 +1,315 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of main</title>
+  <meta name="keywords" content="main">
+  <meta name="description" content="main - Main simulation driver.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">implicitFinal</a> &gt; main.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\implicitFinal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>main
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>main - Main simulation driver.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> main - Main simulation driver.
+
+
+ Main simulation driver for 2D incompressible lid-driven cavity flow.
+ Sets solver parameters, builds mesh and element data, runs the time-stepping
+ loop, and saves results and diagnostics to files.
+
+ Inputs: script parameters (Re, timeStep, totitrs, vtkOutputInterval, outputFolder).
+ Outputs: MAT files and VTK files saved to `outputFolder` (velocity, pressure,
+ diagnostics, time series).
+
+ Syntax: main()
+
+ Inputs: none
+
+ Outputs: none</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="computeDeltaVals.html" class="code" title="function [unplus_col,vnplus_col,pnplus_col] = computeDeltaVals(numElements,totNumNodes,un_col,vn_col,pn_col,elementData,timeStep,Re,B,bc)">computeDeltaVals</a>	computeDeltaVals - Compute delta Vals.</li><li><a href="getGaussRelated.html" class="code" title="function [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesVals_vec,yNodesVals_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G)">getGaussRelated</a>	getGaussRelated - Return Gauss Related.</li><li><a href="makeVTKdir.html" class="code" title="function []=makeVTKdir(outputFolder)">makeVTKdir</a>	makeVTKdir - Ensure VTK output directory exists.</li><li><a href="quad4_to_quadHigh.html" class="code" title="function [quadN_conn, xCoordN, yCoordN] = quad4_to_quadHigh(quad4_conn, xCoord, yCoord, order)">quad4_to_quadHigh</a>	quad4_to_quadHigh - Convert Quad4 mesh to higher-order quadrilateral mesh.</li><li><a href="structuredMesh.html" class="code" title="function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin)">structuredMesh</a>	structuredMesh - Create structured quadrilateral mesh.</li><li><a href="writeFinalVTK.html" class="code" title="function []=writeFinalVTK(xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time,outputFolder)">writeFinalVTK</a>	writeFinalVTK - Write VTK output files.</li><li><a href="writeVTKatInterval.html" class="code" title="function []=writeVTKatInterval(outputFolder,itr,xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time)">writeVTKatInterval</a>	writeVTKatInterval - Write VTK output files.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% main - Main simulation driver.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Main simulation driver for 2D incompressible lid-driven cavity flow.</span>
+0005 <span class="comment">% Sets solver parameters, builds mesh and element data, runs the time-stepping</span>
+0006 <span class="comment">% loop, and saves results and diagnostics to files.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Inputs: script parameters (Re, timeStep, totitrs, vtkOutputInterval, outputFolder).</span>
+0009 <span class="comment">% Outputs: MAT files and VTK files saved to `outputFolder` (velocity, pressure,</span>
+0010 <span class="comment">% diagnostics, time series).</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% Syntax: main()</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Inputs: none</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Outputs: none</span>
+0017 <span class="comment">%</span>
+0018 
+0019 clc;clearvars;close all;
+0020 tic
+0021 
+0022 <span class="comment">%% Element informations</span>
+0023 numGaussPoints  = 10;
+0024 numGeometryGaussPoints = numGaussPoints;
+0025 
+0026 D = 2;
+0027 
+0028 order   = 1;                <span class="comment">% Order of Solution Element</span>
+0029 K       = (order + 1)^D;    <span class="comment">% Solution Element number of nodes (has to be consistent with order of element specified below)</span>
+0030 
+0031 order_G = 1;                <span class="comment">% Order of Geometric Element (Should be the same as Geometric meshing)</span>
+0032 K_G     = (order_G + 1)^D;  <span class="comment">% Geometric Element number of nodes (has to be consistent with order of element specified below)</span>
+0033 
+0034 <span class="comment">%% Global Parameters</span>
+0035 Re        = 10;
+0036 B         = 1/Re;
+0037 timeStep  = 0.0005;
+0038 totitrs   = 1130;
+0039 
+0040 <span class="comment">% Re = 10   -&gt; totitres = 565   , timeStep = 0.001  , order 1, 40*40</span>
+0041 <span class="comment">% Re = 100  -&gt; totitrss = 1500  , timeStep = 0.0067 , order 1, 40*40</span>
+0042 <span class="comment">% Re = 1000 -&gt; totitrss = 40500 , timeStep = 0.001  , order 1, 26*26</span>
+0043 
+0044 <span class="comment">%% VTK file realated parameters</span>
+0045 vtkOutputInterval = 1000;
+0046 outputFolder = sprintf(<span class="string">'CavityResutsRe%dHigher'</span>, Re);
+0047 <a href="makeVTKdir.html" class="code" title="function []=makeVTKdir(outputFolder)">makeVTKdir</a>(outputFolder)
+0048 
+0049 <span class="comment">%% Connectivity Matrix and Grid Generation</span>
+0050 numElementsX = 26;
+0051 numElementsY = 26;
+0052 numNodesX    = numElementsX + 1;
+0053 numNodesY    = numElementsY + 1;
+0054 
+0055 lengthX      = 1;
+0056 lengthY      = 1;
+0057 xMin         = 0;
+0058 yMin         = 0;
+0059 
+0060 [connectivityMatrixGeo_mat,xCoordGeo_vec,yCoordGeo_vec] = <a href="structuredMesh.html" class="code" title="function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin)">structuredMesh</a>(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin);
+0061 
+0062 <span class="comment">%% Converting to higher order mesh</span>
+0063 <span class="keyword">if</span> order &gt; 1
+0064     [quad_high_conn, xCoord_high, yCoord_high] = <a href="quad4_to_quadHigh.html" class="code" title="function [quadN_conn, xCoordN, yCoordN] = quad4_to_quadHigh(quad4_conn, xCoord, yCoord, order)">quad4_to_quadHigh</a>(connectivityMatrixGeo_mat, xCoordGeo_vec, yCoordGeo_vec, order);
+0065     connectivityMatrix_mat = quad_high_conn;
+0066     xCoord_vec  = xCoord_high;
+0067     yCoord_vec  = yCoord_high;
+0068 <span class="keyword">else</span>
+0069     connectivityMatrix_mat = connectivityMatrixGeo_mat;
+0070     xCoord_vec  = xCoordGeo_vec;
+0071     yCoord_vec  = yCoordGeo_vec;
+0072     xCoord_high = xCoordGeo_vec;
+0073     yCoord_high = yCoordGeo_vec;
+0074 <span class="keyword">end</span>
+0075 
+0076 <span class="comment">%% Precompute geometric data for all elements</span>
+0077 numElements = numElementsX * numElementsY;
+0078 elementData = cell(numElements, 1);
+0079 <span class="keyword">for</span> eleNum = 1:numElements
+0080     elementNodesGeo_vec = connectivityMatrixGeo_mat(eleNum,:);
+0081     xNodesValsGeo_vec   = xCoordGeo_vec(elementNodesGeo_vec);
+0082     yNodesValsGeo_vec   = yCoordGeo_vec(elementNodesGeo_vec);
+0083 
+0084     [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = <a href="getGaussRelated.html" class="code" title="function [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesVals_vec,yNodesVals_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G)">getGaussRelated</a>(xNodesValsGeo_vec,yNodesValsGeo_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
+0085     
+0086     elementData{eleNum}.Nodes      = connectivityMatrix_mat(eleNum,:);
+0087     elementData{eleNum}.weights    = weights_pages;
+0088     elementData{eleNum}.N_row      = N_row_points_pages;
+0089     elementData{eleNum}.J_det      = J_det_points_elev;
+0090     elementData{eleNum}.dNdX       = N_diff_PhysCoords_points_rows_pages(1, :, :);
+0091     elementData{eleNum}.dNdY       = N_diff_PhysCoords_points_rows_pages(2, :, :);
+0092     elementData{eleNum}.physCoords = ElementPhysCoords_mat;
+0093 <span class="keyword">end</span>
+0094 
+0095 <span class="comment">%% Boundary Conditions locations</span>
+0096 tolBC   = 1e-12;
+0097 ind_vec = 1:length(xCoord_vec);
+0098 
+0099 lowerWall_vec          =  abs(yCoord_vec - 0) &lt; tolBC;
+0100 upperWallNoCorners_vec = (abs(yCoord_vec - lengthY) &lt; tolBC) &amp; (abs(xCoord_vec - lengthX) &gt;= tolBC) &amp; (abs(xCoord_vec - 0) &gt;= tolBC);
+0101 rightWallNoCorner_vec  = (abs(xCoord_vec - lengthX) &lt; tolBC) &amp; (abs(yCoord_vec - lengthY) &gt;= tolBC);
+0102 leftWallNoCorner_vec   = (abs(xCoord_vec - 0) &lt; tolBC)       &amp; (abs(yCoord_vec - lengthY) &gt;= tolBC);
+0103 upperLeftCorner_vec    = (abs(xCoord_vec - 0) &lt; tolBC)       &amp; (abs(yCoord_vec - lengthY) &lt; tolBC);
+0104 upperRightCorner_vec   = (abs(xCoord_vec - lengthX) &lt; tolBC) &amp; (abs(yCoord_vec - lengthY) &lt; tolBC);
+0105 pBCCondition_col       = (abs(xCoord_vec - 0.5)&lt; tolBC) &amp; (abs(yCoord_vec - 0)&lt; tolBC);
+0106 
+0107 <span class="comment">%% Initial Conditions</span>
+0108 totNumNodes = length(xCoord_high);
+0109 un_col = zeros(totNumNodes,1);
+0110 vn_col = zeros(totNumNodes,1);
+0111 pn_col = zeros(totNumNodes,1);
+0112 
+0113 <span class="comment">%% Boundary Conditions Informations</span>
+0114 uNodesAll = [ <span class="keyword">...</span>
+0115     ind_vec(lowerWall_vec), <span class="keyword">...</span>
+0116     ind_vec(upperWallNoCorners_vec), <span class="keyword">...</span>
+0117     ind_vec(rightWallNoCorner_vec), <span class="keyword">...</span>
+0118     ind_vec(leftWallNoCorner_vec), <span class="keyword">...</span>
+0119     ind_vec(upperLeftCorner_vec), <span class="keyword">...</span>
+0120     ind_vec(upperRightCorner_vec)];
+0121     
+0122 uValsAll = [ <span class="keyword">...</span>
+0123     zeros(1,nnz(lowerWall_vec)), <span class="keyword">...</span>
+0124     ones(1,nnz(upperWallNoCorners_vec)), <span class="keyword">...</span>
+0125     zeros(1,nnz(rightWallNoCorner_vec)), <span class="keyword">...</span>
+0126     zeros(1,nnz(leftWallNoCorner_vec)), <span class="keyword">...</span>
+0127     1, 1];
+0128 
+0129 vNodesAll = uNodesAll;
+0130 vValsAll  = zeros(size(vNodesAll));
+0131 
+0132 pNodesAll = ind_vec(pBCCondition_col);
+0133 pValsAll  = zeros(size(pNodesAll));
+0134 
+0135 [bc.uNodes, iu] = unique(uNodesAll, &quot;stable&quot;);
+0136 bc.uVals = uValsAll(iu).';
+0137 
+0138 [bc.vNodes, iv] = unique(vNodesAll, &quot;stable&quot;);
+0139 bc.vVals = vValsAll(iv).';
+0140 
+0141 [bc.pNodes, ip] = unique(pNodesAll, &quot;stable&quot;);
+0142 bc.pVals = pValsAll(ip).';
+0143 
+0144 <span class="comment">%% Enforce BC on initialized fields</span>
+0145 un_col(bc.uNodes) = bc.uVals;
+0146 vn_col(bc.vNodes) = bc.vVals;
+0147 pn_col(bc.pNodes) = bc.pVals;
+0148 
+0149 <span class="comment">%% time Loop</span>
+0150 itr  = 1;
+0151 time = 0;
+0152 
+0153 <span class="keyword">while</span>(itr &lt; totitrs)
+0154 
+0155     <span class="comment">%% Compute Delta Values</span>
+0156     [unplus_col,vnplus_col,pnplus_col] = <a href="computeDeltaVals.html" class="code" title="function [unplus_col,vnplus_col,pnplus_col] = computeDeltaVals(numElements,totNumNodes,un_col,vn_col,pn_col,elementData,timeStep,Re,B,bc)">computeDeltaVals</a>(numElements,totNumNodes,un_col,vn_col,pn_col,elementData,timeStep,Re,B,bc);
+0157     <span class="comment">%% Reassigning initial Conditions</span>
+0158     un_col  = unplus_col;
+0159     vn_col  = vnplus_col;
+0160     pn_col  = pnplus_col;
+0161 
+0162     <span class="comment">%% Writting VTK File</span>
+0163     <span class="keyword">if</span> mod(itr, vtkOutputInterval) == 0
+0164         <a href="writeVTKatInterval.html" class="code" title="function []=writeVTKatInterval(outputFolder,itr,xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time)">writeVTKatInterval</a>(outputFolder,itr,xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pn_col,time)
+0165     <span class="keyword">end</span>
+0166 
+0167     <span class="comment">%% Stepping</span>
+0168     time = time + timeStep;
+0169     itr  = itr + 1;
+0170     disp(itr)
+0171     
+0172 <span class="keyword">end</span>
+0173 toc
+0174 <a href="writeFinalVTK.html" class="code" title="function []=writeFinalVTK(xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time,outputFolder)">writeFinalVTK</a>(xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pn_col,time,outputFolder)
+0175 
+0176 <span class="comment">%% Plotting Code</span>
+0177 <span class="comment">% variation of x-component of velocity</span>
+0178 pakdel_mat   = readmatrix(<span class="string">'x_velocityVariationPakdel10Re.csv'</span>, <span class="string">'FileType'</span>, <span class="string">'text'</span>, <span class="string">'Range'</span>, <span class="string">'A1:B94'</span>);
+0179 xpakdel_vec  = pakdel_mat(:,1);
+0180 ypakdel_vec  = pakdel_mat(:,2);
+0181 
+0182 <span class="comment">% Extract data at x = 0.5 and sort by y-coordinate</span>
+0183 xEqualHalf_indices = ind_vec(xCoord_vec == 0.5);
+0184 y_coords_at_xHalf  = yCoord_vec(xEqualHalf_indices);
+0185 u_vals_at_xHalf    = un_col(xEqualHalf_indices);
+0186 
+0187 <span class="comment">% Sort the data by y-coordinate</span>
+0188 [sorted_y, sort_order] = sort(y_coords_at_xHalf);
+0189 sorted_u = u_vals_at_xHalf(sort_order);
+0190 
+0191 figure;
+0192 plot(sorted_u, sorted_y, <span class="string">'b-'</span>, <span class="string">'LineWidth'</span>, 1.5)
+0193 hold on
+0194 plot(xpakdel_vec, ypakdel_vec, <span class="string">'o'</span>, <span class="string">'LineWidth'</span>, 1.5)
+0195 title(sprintf([<span class="string">'Variation of x-velocity component along y at x = 0.5. '</span> <span class="keyword">...</span>
+0196                <span class="string">'Taken Time: %.3f min, Element used: Q%d, Num of Elements: %d'</span>], <span class="keyword">...</span>
+0197                toc/60, K, numElements), <span class="keyword">...</span>
+0198       <span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+0199 xlabel(<span class="string">'u'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0200 ylabel(<span class="string">'Y'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0201 legend(<span class="string">'Current Solution'</span>, <span class="string">'Reference Data'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
+0202 grid on
+0203 
+0204 <span class="comment">%% Contour Plots: p, u, v distributions</span>
+0205 nPlot = 121;
+0206 xPlot = linspace(min(xCoord_vec), max(xCoord_vec), nPlot);
+0207 yPlot = linspace(min(yCoord_vec), max(yCoord_vec), nPlot);
+0208 [Xplot, Yplot] = meshgrid(xPlot, yPlot);
+0209 
+0210 Fu = scatteredInterpolant(xCoord_vec(:), yCoord_vec(:), un_col(:), <span class="string">'natural'</span>, <span class="string">'nearest'</span>);
+0211 Fv = scatteredInterpolant(xCoord_vec(:), yCoord_vec(:), vn_col(:), <span class="string">'natural'</span>, <span class="string">'nearest'</span>);
+0212 Fp = scatteredInterpolant(xCoord_vec(:), yCoord_vec(:), pn_col(:), <span class="string">'natural'</span>, <span class="string">'nearest'</span>);
+0213 
+0214 Uplot = Fu(Xplot, Yplot);
+0215 Vplot = Fv(Xplot, Yplot);
+0216 Pplot = Fp(Xplot, Yplot);
+0217 NUM = 500;
+0218 figure;
+0219 contourf(Xplot, Yplot, Pplot, NUM, <span class="string">'LineColor'</span>, <span class="string">'none'</span>);
+0220 colorbar;
+0221 axis equal tight;
+0222 xlabel(<span class="string">'x'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0223 ylabel(<span class="string">'y'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0224 title(<span class="string">'Pressure Contour Distribution'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0225 grid on;
+0226 
+0227 figure;
+0228 contourf(Xplot, Yplot, Uplot, NUM, <span class="string">'LineColor'</span>, <span class="string">'none'</span>);
+0229 colorbar;
+0230 axis equal tight;
+0231 xlabel(<span class="string">'x'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0232 ylabel(<span class="string">'y'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0233 title(<span class="string">'u-Velocity Contour Distribution'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0234 grid on;
+0235 
+0236 figure;
+0237 contourf(Xplot, Yplot, Vplot, NUM, <span class="string">'LineColor'</span>, <span class="string">'none'</span>);
+0238 colorbar;
+0239 axis equal tight;
+0240 xlabel(<span class="string">'x'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0241 ylabel(<span class="string">'y'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0242 title(<span class="string">'v-Velocity Contour Distribution'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0243 grid on;
+0244 
+0245 
+0246 Re_tag = Re;   <span class="comment">% uses the Re variable already defined in main.m</span>
+0247 
+0248 save(sprintf(<span class="string">'cavity_implicit_Re%d.mat'</span>, Re_tag), <span class="keyword">...</span>
+0249     <span class="string">'xCoord_vec'</span>, <span class="string">'yCoord_vec'</span>, <span class="keyword">...</span><span class="comment">   % nodal coordinates (high-order mesh)</span>
+0250     <span class="string">'un_col'</span>, <span class="string">'vn_col'</span>, <span class="string">'pn_col'</span>, <span class="keyword">...</span><span class="comment"> % converged velocity and pressure</span>
+0251     <span class="string">'connectivityMatrix_mat'</span>, <span class="keyword">...</span><span class="comment">     % element connectivity</span>
+0252     <span class="string">'Re'</span>, <span class="string">'timeStep'</span>, <span class="string">'time'</span>, <span class="keyword">...</span><span class="comment">     % run parameters</span>
+0253     <span class="string">'numElementsX'</span>, <span class="string">'numElementsY'</span>, <span class="string">'order'</span>);</pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

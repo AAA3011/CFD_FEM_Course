@@ -1,0 +1,41 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  N_diff_rows2D -> N_diff_rows;
+  N_diff_rows2D -> N_row;
+  N_row2D -> N_row;
+  getGaussRelated -> Jacobian;
+  getGaussRelated -> N_diff_rows2D;
+  getGaussRelated -> N_row2D;
+  getGaussRelated -> gaussLegendreQuad;
+  getGaussRelated -> getLagrangeIndices;
+  main -> computeLocalNS;
+  main -> computeLocalNSP;
+  main -> computePressure;
+  main -> getGaussRelated;
+  main -> makeVTKdir;
+  main -> quad4_to_quadHigh;
+  main -> structuredMesh;
+  main -> writeFinalVTK;
+  main -> writeVTKatInterval;
+  writeFinalVTK -> newVTK;
+  writeVTKatInterval -> newVTK;
+
+  Jacobian [URL="Jacobian.html"];
+  N_diff_rows [URL="N_diff_rows.html"];
+  N_diff_rows2D [URL="N_diff_rows2D.html"];
+  N_row [URL="N_row.html"];
+  N_row2D [URL="N_row2D.html"];
+  computeLocalNS [URL="computeLocalNS.html"];
+  computeLocalNSP [URL="computeLocalNSP.html"];
+  computePressure [URL="computePressure.html"];
+  gaussLegendreQuad [URL="gaussLegendreQuad.html"];
+  getGaussRelated [URL="getGaussRelated.html"];
+  getLagrangeIndices [URL="getLagrangeIndices.html"];
+  main [URL="main.html"];
+  makeVTKdir [URL="makeVTKdir.html"];
+  newVTK [URL="newVTK.html"];
+  quad4_to_quadHigh [URL="quad4_to_quadHigh.html"];
+  structuredMesh [URL="structuredMesh.html"];
+  writeFinalVTK [URL="writeFinalVTK.html"];
+  writeVTKatInterval [URL="writeVTKatInterval.html"];
+}

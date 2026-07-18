@@ -1,0 +1,312 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of newVTK</title>
+  <meta name="keywords" content="newVTK">
+  <meta name="description" content="newVTK - Write VTK output files.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">implicitFinal</a> &gt; newVTK.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\implicitFinal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>newVTK
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>newVTK - Write VTK output files.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function newVTK(xCoord_vec, yCoord_vec, un_cvec, vn_cvec, connectivityMatrix_mat, pressureSolution_cvec, filename, time) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> newVTK - Write VTK output files.
+
+ FILE: newVTK.m
+ DESCRIPTION:
+ Write mesh and field data into a VTK (ASCII) file for ParaView/visual-
+ ization. Handles linear and some higher-order element subdivision.
+
+ Inputs:
+   xCoord_vec (column vector): Nodal x-coordinates of the mesh.
+   yCoord_vec (column vector): Nodal y-coordinates of the mesh.
+   un_cvec (column vector): Nodal u-velocity values for the current field.
+   vn_cvec (column vector): Nodal v-velocity values for the current field.
+   connectivityMatrix_mat (matrix): Element connectivity matrix (nElements x nodesPerElement)
+   pressureSolution_cvec (column vector): Nodal pressure values for the current field.
+   filename (variable): Output file name (string).
+   time (variable): Time step (scalar)
+ Outputs:
+   none
+ Prepare data for export</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="writeFinalVTK.html" class="code" title="function []=writeFinalVTK(xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time,outputFolder)">writeFinalVTK</a>	writeFinalVTK - Write VTK output files.</li><li><a href="writeVTKatInterval.html" class="code" title="function []=writeVTKatInterval(outputFolder,itr,xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time)">writeVTKatInterval</a>	writeVTKatInterval - Write VTK output files.</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [xNodes_new, yNodes_new, zNodes_new, conn_new, velocity_new, pressure_new, velMag_new] =</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% newVTK - Write VTK output files.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% FILE: newVTK.m</span>
+0004 <span class="comment">% DESCRIPTION:</span>
+0005 <span class="comment">% Write mesh and field data into a VTK (ASCII) file for ParaView/visual-</span>
+0006 <span class="comment">% ization. Handles linear and some higher-order element subdivision.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Inputs:</span>
+0009 <span class="comment">%   xCoord_vec (column vector): Nodal x-coordinates of the mesh.</span>
+0010 <span class="comment">%   yCoord_vec (column vector): Nodal y-coordinates of the mesh.</span>
+0011 <span class="comment">%   un_cvec (column vector): Nodal u-velocity values for the current field.</span>
+0012 <span class="comment">%   vn_cvec (column vector): Nodal v-velocity values for the current field.</span>
+0013 <span class="comment">%   connectivityMatrix_mat (matrix): Element connectivity matrix (nElements x nodesPerElement)</span>
+0014 <span class="comment">%   pressureSolution_cvec (column vector): Nodal pressure values for the current field.</span>
+0015 <span class="comment">%   filename (variable): Output file name (string).</span>
+0016 <span class="comment">%   time (variable): Time step (scalar)</span>
+0017 <span class="comment">% Outputs:</span>
+0018 <span class="comment">%   none</span>
+0019 <a name="_sub0" href="#_subfunctions" class="code">function newVTK(xCoord_vec, yCoord_vec, un_cvec, vn_cvec, connectivityMatrix_mat, pressureSolution_cvec, filename, time)</a>
+0020     <span class="comment">% Prepare data for export</span>
+0021     xNodes = xCoord_vec;
+0022     yNodes = yCoord_vec;
+0023     zNodes = zeros(size(xNodes)); <span class="comment">% Create a z-vector of zeros for 2D data</span>
+0024 
+0025     <span class="comment">% Combine velocity components into a vector field</span>
+0026     velocityVector = [un_cvec, vn_cvec, zeros(length(un_cvec), 1)];
+0027 
+0028     <span class="comment">% Calculate velocity magnitude</span>
+0029     velocityMagnitude = sqrt(un_cvec.^2 + vn_cvec.^2);
+0030 
+0031     numNodesPerElement = size(connectivityMatrix_mat, 2);
+0032     
+0033     <span class="comment">% Check if we need to subdivide higher-order elements (order &gt; 2)</span>
+0034     <span class="keyword">if</span> numNodesPerElement &gt; 9
+0035         <span class="comment">% Subdivide higher-order elements into linear quads for ParaView compatibility</span>
+0036         [xNodes, yNodes, zNodes, connectivityMatrix_mat, velocityVector, pressureSolution_cvec, velocityMagnitude] = <span class="keyword">...</span>
+0037             subdivideHigherOrderElements(xCoord_vec, yCoord_vec, un_cvec, vn_cvec, <span class="keyword">...</span>
+0038                                         connectivityMatrix_mat, pressureSolution_cvec);
+0039         numNodesPerElement = 4; <span class="comment">% After subdivision</span>
+0040     <span class="keyword">end</span>
+0041 
+0042     <span class="comment">% Use ASCII output (most reliable for ParaView)</span>
+0043     fid = fopen(filename, <span class="string">'w'</span>);
+0044 
+0045     <span class="comment">% Write VTK header with time information</span>
+0046     fprintf(fid, <span class="string">'# vtk DataFile Version 2.0\n'</span>);
+0047     fprintf(fid, <span class="string">'Flow Simulation - Time: %.6f\n'</span>, time);
+0048     fprintf(fid, <span class="string">'ASCII\n'</span>);
+0049     fprintf(fid, <span class="string">'DATASET UNSTRUCTURED_GRID\n\n'</span>);
+0050     
+0051     <span class="comment">% Write points</span>
+0052     fprintf(fid, <span class="string">'POINTS %d float\n'</span>, length(xNodes));
+0053     <span class="keyword">for</span> i = 1:length(xNodes)
+0054         fprintf(fid, <span class="string">'%.6f %.6f %.6f\n'</span>, xNodes(i), yNodes(i), zNodes(i));
+0055     <span class="keyword">end</span>
+0056     fprintf(fid, <span class="string">'\n'</span>);
+0057     
+0058     <span class="comment">% Write cells (elements)</span>
+0059     numElements = size(connectivityMatrix_mat, 1);
+0060     numNodesPerElement = size(connectivityMatrix_mat, 2);
+0061 
+0062     <span class="comment">% Calculate total size: (1 count + N nodes) per element</span>
+0063     totalSize = numElements * (1 + numNodesPerElement);
+0064 
+0065     <span class="comment">% Reorder connectivity for VTK_BIQUADRATIC_QUAD (Quad9 only)</span>
+0066     vtk_conn = connectivityMatrix_mat;
+0067     <span class="keyword">if</span> numNodesPerElement == 9
+0068         <span class="comment">% VTK Quad9 ordering: corners (0-3), mid-edges (4-7), center (8)</span>
+0069         <span class="comment">% Our ordering: corners (1-4), edge1 (5), edge2 (6), edge3 (7), edge4 (8), center (9)</span>
+0070         <span class="keyword">for</span> e = 1:numElements
+0071             local = connectivityMatrix_mat(e, :);
+0072             <span class="comment">% Reorder: [c1 c2 c3 c4 e1 e2 e3 e4 center]</span>
+0073             vtk_conn(e, :) = [local(1), local(2), local(3), local(4), <span class="keyword">...</span>
+0074                               local(5), local(6), local(7), local(8), local(9)];
+0075         <span class="keyword">end</span>
+0076     <span class="keyword">end</span>
+0077 
+0078     fprintf(fid, <span class="string">'CELLS %d %d\n'</span>, numElements, totalSize);
+0079     <span class="keyword">for</span> i = 1:numElements
+0080         nodes = vtk_conn(i, :) - 1;  <span class="comment">% Convert to zero-based indexing</span>
+0081         fprintf(fid, <span class="string">'%d'</span>, numNodesPerElement);
+0082         <span class="keyword">for</span> j = 1:numNodesPerElement
+0083             fprintf(fid, <span class="string">' %d'</span>, nodes(j));
+0084         <span class="keyword">end</span>
+0085         fprintf(fid, <span class="string">'\n'</span>);
+0086     <span class="keyword">end</span>
+0087     fprintf(fid, <span class="string">'\n'</span>);
+0088     
+0089     <span class="comment">% Write cell types</span>
+0090     fprintf(fid, <span class="string">'CELL_TYPES %d\n'</span>, numElements);
+0091     <span class="keyword">if</span> numNodesPerElement == 4
+0092         cellType = 9; <span class="comment">% VTK_QUAD</span>
+0093     <span class="keyword">elseif</span> numNodesPerElement == 9
+0094         cellType = 28; <span class="comment">% VTK_BIQUADRATIC_QUAD (properly ordered)</span>
+0095     <span class="keyword">else</span>
+0096         <span class="comment">% For higher orders (16, 25, etc), use polygon with linear interpolation</span>
+0097         cellType = 7; <span class="comment">% VTK_POLYGON</span>
+0098     <span class="keyword">end</span>
+0099     <span class="keyword">for</span> i = 1:numElements
+0100         fprintf(fid, <span class="string">'%d\n'</span>, cellType);
+0101     <span class="keyword">end</span>
+0102     fprintf(fid, <span class="string">'\n'</span>);
+0103     
+0104     <span class="comment">% Write FIELD data (global data - only 1 tuple) BEFORE point data</span>
+0105     fprintf(fid, <span class="string">'FIELD FieldData 2\n'</span>);
+0106     fprintf(fid, <span class="string">'TIME 1 1 double\n'</span>);
+0107     fprintf(fid, <span class="string">'%.6f\n'</span>, time);
+0108     fprintf(fid, <span class="string">'CYCLE 1 1 int\n'</span>);
+0109     fprintf(fid, <span class="string">'%d\n'</span>, round(time/0.005));
+0110     fprintf(fid, <span class="string">'\n'</span>);
+0111     
+0112     <span class="comment">% Write point data</span>
+0113     fprintf(fid, <span class="string">'POINT_DATA %d\n'</span>, length(xNodes));
+0114 
+0115     <span class="comment">% Write velocity vectors</span>
+0116     fprintf(fid, <span class="string">'VECTORS velocity float\n'</span>);
+0117     <span class="keyword">for</span> i = 1:length(velocityVector)
+0118         fprintf(fid, <span class="string">'%.6f %.6f %.6f\n'</span>, velocityVector(i, 1), velocityVector(i, 2), velocityVector(i, 3));
+0119     <span class="keyword">end</span>
+0120     fprintf(fid, <span class="string">'\n'</span>);
+0121 
+0122     <span class="comment">% Write pressure scalar field</span>
+0123     fprintf(fid, <span class="string">'SCALARS pressure float\n'</span>);
+0124     fprintf(fid, <span class="string">'LOOKUP_TABLE default\n'</span>);
+0125     <span class="keyword">for</span> i = 1:length(pressureSolution_cvec)
+0126         fprintf(fid, <span class="string">'%.6f\n'</span>, pressureSolution_cvec(i));
+0127     <span class="keyword">end</span>
+0128     fprintf(fid, <span class="string">'\n'</span>);
+0129 
+0130     <span class="comment">% Write velocity magnitude scalar field</span>
+0131     fprintf(fid, <span class="string">'SCALARS velocity_magnitude float\n'</span>);
+0132     fprintf(fid, <span class="string">'LOOKUP_TABLE default\n'</span>);
+0133     <span class="keyword">for</span> i = 1:length(velocityMagnitude)
+0134         fprintf(fid, <span class="string">'%.6f\n'</span>, velocityMagnitude(i));
+0135     <span class="keyword">end</span>
+0136     
+0137     <span class="comment">% Close file</span>
+0138     fclose(fid);
+0139 <span class="keyword">end</span>
+0140 
+0141 <a name="_sub1" href="#_subfunctions" class="code">function [xNodes_new, yNodes_new, zNodes_new, conn_new, velocity_new, pressure_new, velMag_new] = </a><span class="keyword">...</span>
+0142     subdivideHigherOrderElements(xCoord, yCoord, u_vec, v_vec, connectivity, pressure)
+0143     <span class="comment">% Subdivide higher-order quads into linear quads for ParaView</span>
+0144     
+0145     numElements = size(connectivity, 1);
+0146     nodesPerElem = size(connectivity, 2);
+0147     p = round(sqrt(nodesPerElem)) - 1; <span class="comment">% polynomial order</span>
+0148     n = p + 1; <span class="comment">% nodes per side</span>
+0149     
+0150     <span class="comment">% Each higher-order element subdivides into p×p linear quads</span>
+0151     numSubQuads = p * p;
+0152     conn_new = zeros(numElements * numSubQuads, 4);
+0153     
+0154     <span class="comment">% Map original connectivity to grid [i,j] where i,j = 1..n</span>
+0155     nodeCounter = size(xCoord, 1);
+0156     xNodes_new = xCoord;
+0157     yNodes_new = yCoord;
+0158     zNodes_new = zeros(size(xCoord));
+0159     velocity_new = [u_vec, v_vec, zeros(size(u_vec))];
+0160     pressure_new = pressure;
+0161     velMag_new = sqrt(u_vec.^2 + v_vec.^2);
+0162     
+0163     elemCounter = 0;
+0164     
+0165     <span class="keyword">for</span> elem = 1:numElements
+0166         local = connectivity(elem, :);
+0167         
+0168         <span class="comment">% Build node grid (i=xi, j=eta, both 1..n)</span>
+0169         grid = zeros(n, n);
+0170         pos = 1;
+0171         <span class="comment">% Corners</span>
+0172         grid(1,1) = local(pos); pos = pos + 1;
+0173         grid(n,1) = local(pos); pos = pos + 1;
+0174         grid(n,n) = local(pos); pos = pos + 1;
+0175         grid(1,n) = local(pos); pos = pos + 1;
+0176         
+0177         <span class="comment">% Edges</span>
+0178         <span class="keyword">for</span> k = 2:(n-1)
+0179             grid(k,1) = local(pos); pos = pos + 1; <span class="comment">% bottom</span>
+0180         <span class="keyword">end</span>
+0181         <span class="keyword">for</span> k = 2:(n-1)
+0182             grid(n,k) = local(pos); pos = pos + 1; <span class="comment">% right</span>
+0183         <span class="keyword">end</span>
+0184         <span class="keyword">for</span> k = (n-1):-1:2
+0185             grid(k,n) = local(pos); pos = pos + 1; <span class="comment">% top</span>
+0186         <span class="keyword">end</span>
+0187         <span class="keyword">for</span> k = (n-1):-1:2
+0188             grid(1,k) = local(pos); pos = pos + 1; <span class="comment">% left</span>
+0189         <span class="keyword">end</span>
+0190         
+0191         <span class="comment">% Interior (CCW rings)</span>
+0192         <span class="keyword">if</span> n &gt; 2
+0193             m = n - 2;
+0194             rings = ceil(m/2);
+0195             <span class="keyword">for</span> r = 1:rings
+0196                 left = r + 1;
+0197                 right = n - r;
+0198                 bottom = r + 1;
+0199                 top = n - r;
+0200                 
+0201                 <span class="keyword">if</span> left == right &amp;&amp; bottom == top
+0202                     grid(left, bottom) = local(pos);
+0203                     pos = pos + 1;
+0204                 <span class="keyword">else</span>
+0205                     <span class="keyword">for</span> i = left:right
+0206                         grid(i, bottom) = local(pos);
+0207                         pos = pos + 1;
+0208                     <span class="keyword">end</span>
+0209                     <span class="keyword">for</span> j = bottom+1:top
+0210                         grid(right, j) = local(pos);
+0211                         pos = pos + 1;
+0212                     <span class="keyword">end</span>
+0213                     <span class="keyword">if</span> top ~= bottom
+0214                         <span class="keyword">for</span> i = (right-1):-1:left
+0215                             grid(i, top) = local(pos);
+0216                             pos = pos + 1;
+0217                         <span class="keyword">end</span>
+0218                     <span class="keyword">end</span>
+0219                     <span class="keyword">if</span> left ~= right
+0220                         <span class="keyword">for</span> j = (top-1):-1:(bottom+1)
+0221                             grid(left, j) = local(pos);
+0222                             pos = pos + 1;
+0223                         <span class="keyword">end</span>
+0224                     <span class="keyword">end</span>
+0225                 <span class="keyword">end</span>
+0226             <span class="keyword">end</span>
+0227         <span class="keyword">end</span>
+0228         
+0229         <span class="comment">% Create p×p sub-quads</span>
+0230         <span class="keyword">for</span> j = 1:p
+0231             <span class="keyword">for</span> i = 1:p
+0232                 elemCounter = elemCounter + 1;
+0233                 <span class="comment">% Sub-quad corners in grid coordinates</span>
+0234                 n1 = grid(i, j);
+0235                 n2 = grid(i+1, j);
+0236                 n3 = grid(i+1, j+1);
+0237                 n4 = grid(i, j+1);
+0238                 conn_new(elemCounter, :) = [n1, n2, n3, n4];
+0239             <span class="keyword">end</span>
+0240         <span class="keyword">end</span>
+0241     <span class="keyword">end</span>
+0242     
+0243     <span class="comment">% Extend arrays to match new node count (no new nodes, just reuse)</span>
+0244     zNodes_new = zeros(size(xNodes_new));
+0245 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of cavityPlot</title>
+  <meta name="keywords" content="cavityPlot">
+  <meta name="description" content="plot - For Preprocessing.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="../index.html">Cavity</a> &gt; <a href="index.html">Plotting</a> &gt; cavityPlot.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../../index.html"><img alt="<" border="0" src="../../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\Cavity\Plotting&nbsp;<img alt=">" border="0" src="../../../right.png"></a></td></tr></table>-->
+
+<h1>cavityPlot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>plot - For Preprocessing.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> plot - For Preprocessing.
+
+  Figures produced  (all saved as .svg):
+   fig1_streamlines.svg  – streamlines only,  1x3 panel
+   fig2_speed.svg        – |u| contours,      1x3 panel
+   fig3_pressure.svg     – pressure,          1x3 panel
+   fig4_validation.svg   – u-profile,         1x3 panel (wide)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function saveSVG(fig, name)</a></li><li><a href="#_sub2" class="code">function val = pf(S, fn, candidates)</a></li><li><a href="#_sub3" class="code">function cmap = redblue(n)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% plot - For Preprocessing.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%  Figures produced  (all saved as .svg):</span>
+0004 <span class="comment">%   fig1_streamlines.svg  – streamlines only,  1x3 panel</span>
+0005 <span class="comment">%   fig2_speed.svg        – |u| contours,      1x3 panel</span>
+0006 <span class="comment">%   fig3_pressure.svg     – pressure,          1x3 panel</span>
+0007 <span class="comment">%   fig4_validation.svg   – u-profile,         1x3 panel (wide)</span>
+0008 
+0009 clc; clearvars; close all;
+0010 
+0011 <span class="comment">%% ── Typography ────────────────────────────────────────────────────────────</span>
+0012 set(groot,<span class="string">'defaultAxesFontName'</span>,<span class="string">'Times New Roman'</span>);
+0013 set(groot,<span class="string">'defaultTextFontName'</span>,<span class="string">'Times New Roman'</span>);
+0014 set(groot,<span class="string">'defaultAxesFontSize'</span>,13);
+0015 
+0016 <span class="comment">%% ── Settings ──────────────────────────────────────────────────────────────</span>
+0017 ReList   = [10, 100, 1000];
+0018 matFiles = {<span class="string">'cavity_resultsRe10.mat'</span>, <span class="keyword">...</span>
+0019             <span class="string">'cavity_resultsRe100.mat'</span>, <span class="keyword">...</span>
+0020             <span class="string">'cavity_resultsRe1000.mat'</span>};
+0021 csvFiles = {<span class="string">'x_velocityVariationPakdel10Re.csv'</span>, <span class="keyword">...</span>
+0022             <span class="string">'x_velocityVariationPakdel100Re.csv'</span>, <span class="keyword">...</span>
+0023             <span class="string">'x_velocityVariationPakdel1000Re.csv'</span>};
+0024 Ngrid = 300;
+0025 LC    = [0.18 0.38 0.75;   <span class="comment">% blue  Re=10</span>
+0026          0.80 0.15 0.15;   <span class="comment">% red   Re=100</span>
+0027          0.10 0.62 0.25];  <span class="comment">% green Re=1000</span>
+0028 
+0029 <span class="comment">%% ── Load ──────────────────────────────────────────────────────────────────</span>
+0030 D = struct();
+0031 <span class="keyword">for</span> k = 1:3
+0032     S  = load(matFiles{k});
+0033     fn = fieldnames(S);
+0034 
+0035     xv = <a href="#_sub2" class="code" title="subfunction val = pf(S, fn, candidates)">pf</a>(S,fn,{<span class="string">'xCoord_vec'</span>,<span class="string">'xCoord_cvec'</span>,<span class="string">'xCoord'</span>,<span class="string">'x_vec'</span>,<span class="string">'x'</span>});
+0036     yv = <a href="#_sub2" class="code" title="subfunction val = pf(S, fn, candidates)">pf</a>(S,fn,{<span class="string">'yCoord_vec'</span>,<span class="string">'yCoord_cvec'</span>,<span class="string">'yCoord'</span>,<span class="string">'y_vec'</span>,<span class="string">'y'</span>});
+0037     u  = <a href="#_sub2" class="code" title="subfunction val = pf(S, fn, candidates)">pf</a>(S,fn,{<span class="string">'uSolution_col'</span>,<span class="string">'uSolution_cvec'</span>,<span class="string">'uSolution'</span>,<span class="string">'u_col'</span>,<span class="string">'u_cvec'</span>,<span class="string">'u'</span>});
+0038     v  = <a href="#_sub2" class="code" title="subfunction val = pf(S, fn, candidates)">pf</a>(S,fn,{<span class="string">'vSolution_col'</span>,<span class="string">'vSolution_cvec'</span>,<span class="string">'vSolution'</span>,<span class="string">'v_col'</span>,<span class="string">'v_cvec'</span>,<span class="string">'v'</span>});
+0039     p  = <a href="#_sub2" class="code" title="subfunction val = pf(S, fn, candidates)">pf</a>(S,fn,{<span class="string">'pressureSolution_col'</span>,<span class="string">'pressureSolution_cvec'</span>,<span class="string">'pressureSolution'</span>,<span class="string">'p_col'</span>,<span class="string">'p_cvec'</span>,<span class="string">'p'</span>});
+0040     xv=xv(:); yv=yv(:); u=u(:); v=v(:); p=p(:);
+0041 
+0042     [xg,yg] = meshgrid(linspace(0,1,Ngrid),linspace(0,1,Ngrid));
+0043     ug = scatteredInterpolant(xv,yv,u,<span class="string">'linear'</span>,<span class="string">'none'</span>); ug=ug(xg,yg);
+0044     vg = scatteredInterpolant(xv,yv,v,<span class="string">'linear'</span>,<span class="string">'none'</span>); vg=vg(xg,yg);
+0045     pg = scatteredInterpolant(xv,yv,p,<span class="string">'linear'</span>,<span class="string">'none'</span>); pg=pg(xg,yg);
+0046 
+0047     D(k).xg=xg; D(k).yg=yg; D(k).ug=ug; D(k).vg=vg; D(k).pg=pg;
+0048     D(k).spd = sqrt(ug.^2 + vg.^2);
+0049 
+0050     <span class="comment">% u-profile at x=0.5</span>
+0051     [~,ci] = min(abs(xv-0.5));
+0052     mask   = abs(xv-xv(ci)) &lt; 1e-9;
+0053     [ys,so]= sort(yv(mask)); utmp=u(mask);
+0054     D(k).y_prof=ys; D(k).u_prof=utmp(so);
+0055 
+0056     <span class="comment">% CSV reference</span>
+0057     <span class="keyword">if</span> exist(csvFiles{k},<span class="string">'file'</span>)
+0058         M=readmatrix(csvFiles{k},<span class="string">'FileType'</span>,<span class="string">'text'</span>);
+0059         D(k).ref_u=M(:,1); D(k).ref_y=M(:,2); D(k).hasRef=true;
+0060         fprintf(<span class="string">'Re=%-4d | CSV: %d pts\n'</span>,ReList(k),size(M,1));
+0061     <span class="keyword">else</span>
+0062         D(k).hasRef=false;
+0063         fprintf(<span class="string">'Re=%-4d | CSV not found\n'</span>,ReList(k));
+0064     <span class="keyword">end</span>
+0065 <span class="keyword">end</span>
+0066 
+0067 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0068 <span class="comment">%  FIGURE 1 – Streamlines only  (1x3 panel, no |u| coloring)</span>
+0069 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0070 f1  = figure(<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[1 2 44 14]);
+0071 tl1 = tiledlayout(1,3,<span class="string">'TileSpacing'</span>,<span class="string">'compact'</span>,<span class="string">'Padding'</span>,<span class="string">'compact'</span>);
+0072 <span class="keyword">for</span> k = 1:3
+0073     nexttile;
+0074     hs = streamslice(D(k).xg, D(k).yg, D(k).ug, D(k).vg, 2.5);
+0075     set(hs,<span class="string">'Color'</span>,LC(k,:),<span class="string">'LineWidth'</span>,1.0);
+0076     axis equal tight; xlim([0 1]); ylim([0 1]);
+0077     xlabel(<span class="string">'x/L'</span>,<span class="string">'FontSize'</span>,13); ylabel(<span class="string">'y/L'</span>,<span class="string">'FontSize'</span>,13);
+0078     title(sprintf(<span class="string">'Re = %d'</span>,ReList(k)),<span class="string">'FontSize'</span>,14,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+0079     set(gca,<span class="string">'Box'</span>,<span class="string">'on'</span>); grid on;
+0080 <span class="keyword">end</span>
+0081 title(tl1,<span class="string">'Streamlines  -  Lid-Driven Cavity Flow'</span>, <span class="keyword">...</span>
+0082       <span class="string">'FontSize'</span>,15,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>,<span class="string">'FontName'</span>,<span class="string">'Times New Roman'</span>);
+0083 <a href="#_sub1" class="code" title="subfunction saveSVG(fig, name)">saveSVG</a>(f1,<span class="string">'fig1_streamlines'</span>);
+0084 
+0085 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0086 <span class="comment">%  FIGURE 2 – Speed magnitude |u|  (1x3 panel)</span>
+0087 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0088 f2  = figure(<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[1 2 44 14]);
+0089 tl2 = tiledlayout(1,3,<span class="string">'TileSpacing'</span>,<span class="string">'compact'</span>,<span class="string">'Padding'</span>,<span class="string">'compact'</span>);
+0090 <span class="keyword">for</span> k = 1:3
+0091     nexttile;
+0092     contourf(D(k).xg, D(k).yg, D(k).spd, 80, <span class="string">'LineColor'</span>,<span class="string">'none'</span>);
+0093     colormap(gca, turbo(256));
+0094     cb = colorbar(<span class="string">'southoutside'</span>);
+0095     cb.Label.String=<span class="string">'Speed  |u|'</span>; cb.Label.FontSize=12;
+0096     axis equal tight; xlim([0 1]); ylim([0 1]);
+0097     xlabel(<span class="string">'x/L'</span>,<span class="string">'FontSize'</span>,13); ylabel(<span class="string">'y/L'</span>,<span class="string">'FontSize'</span>,13);
+0098     title(sprintf(<span class="string">'Re = %d'</span>,ReList(k)),<span class="string">'FontSize'</span>,14,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+0099     set(gca,<span class="string">'Box'</span>,<span class="string">'on'</span>); grid on;
+0100 <span class="keyword">end</span>
+0101 title(tl2,<span class="string">'Velocity Magnitude  -  Lid-Driven Cavity Flow'</span>, <span class="keyword">...</span>
+0102       <span class="string">'FontSize'</span>,15,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>,<span class="string">'FontName'</span>,<span class="string">'Times New Roman'</span>);
+0103 <a href="#_sub1" class="code" title="subfunction saveSVG(fig, name)">saveSVG</a>(f2,<span class="string">'fig2_speed'</span>);
+0104 
+0105 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0106 <span class="comment">%  FIGURE 3 – Pressure contours  (1x3 panel, no iso-lines)</span>
+0107 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0108 f3  = figure(<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[1 2 44 14]);
+0109 tl3 = tiledlayout(1,3,<span class="string">'TileSpacing'</span>,<span class="string">'compact'</span>,<span class="string">'Padding'</span>,<span class="string">'compact'</span>);
+0110 <span class="keyword">for</span> k = 1:3
+0111     nexttile;
+0112     <span class="comment">% Remove arbitrary constant, clip spikes</span>
+0113     pg_k = D(k).pg - mean(D(k).pg(:),<span class="string">'omitnan'</span>);
+0114     sig  = std(pg_k(:),<span class="string">'omitnan'</span>);
+0115     pg_k = max(min(pg_k, 3*sig), -3*sig);
+0116 
+0117     contourf(D(k).xg, D(k).yg, pg_k, 1000, <span class="string">'LineColor'</span>,<span class="string">'none'</span>);
+0118     colormap(gca, <a href="#_sub3" class="code" title="subfunction cmap = redblue(n)">redblue</a>(256));
+0119     plim = max(abs(pg_k(:)));
+0120     <span class="keyword">if</span> plim &gt; 0, clim([-plim plim]); <span class="keyword">end</span>
+0121 
+0122     cb = colorbar(<span class="string">'southoutside'</span>);
+0123     cb.Label.String=<span class="string">'Pressure  p'</span>; cb.Label.FontSize=12;
+0124     axis equal tight; xlim([0 1]); ylim([0 1]);
+0125     xlabel(<span class="string">'x/L'</span>,<span class="string">'FontSize'</span>,13); ylabel(<span class="string">'y/L'</span>,<span class="string">'FontSize'</span>,13);
+0126     title(sprintf(<span class="string">'Re = %d'</span>,ReList(k)),<span class="string">'FontSize'</span>,14,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+0127     set(gca,<span class="string">'Box'</span>,<span class="string">'on'</span>); grid on;
+0128 <span class="keyword">end</span>
+0129 title(tl3,<span class="string">'Pressure Contours  -  Lid-Driven Cavity Flow'</span>, <span class="keyword">...</span>
+0130       <span class="string">'FontSize'</span>,15,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>,<span class="string">'FontName'</span>,<span class="string">'Times New Roman'</span>);
+0131 <a href="#_sub1" class="code" title="subfunction saveSVG(fig, name)">saveSVG</a>(f3,<span class="string">'fig3_pressure'</span>);
+0132 
+0133 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0134 <span class="comment">%  FIGURE 4 – Validation: u-profile at x=0.5  (1x3 panel, wide)</span>
+0135 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0136 f4  = figure(<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[1 2 58 14]);
+0137 tl4 = tiledlayout(1,3,<span class="string">'TileSpacing'</span>,<span class="string">'loose'</span>,<span class="string">'Padding'</span>,<span class="string">'compact'</span>);
+0138 <span class="keyword">for</span> k = 1:3
+0139     nexttile;
+0140     ax = gca;
+0141     hold(ax,<span class="string">'on'</span>);
+0142 
+0143     <span class="comment">% FEM line</span>
+0144     line(ax, D(k).u_prof, D(k).y_prof, <span class="keyword">...</span>
+0145          <span class="string">'Color'</span>,LC(k,:),<span class="string">'LineStyle'</span>,<span class="string">'-'</span>,<span class="string">'LineWidth'</span>,2.2, <span class="keyword">...</span>
+0146          <span class="string">'DisplayName'</span>,sprintf(<span class="string">'FEM  Re=%d'</span>,ReList(k)));
+0147 
+0148     <span class="comment">% Reference markers</span>
+0149     <span class="keyword">if</span> D(k).hasRef
+0150         line(ax, D(k).ref_u, D(k).ref_y, <span class="keyword">...</span>
+0151              <span class="string">'Color'</span>,[0.2 0.2 0.2],<span class="string">'LineStyle'</span>,<span class="string">'none'</span>, <span class="keyword">...</span>
+0152              <span class="string">'Marker'</span>,<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,7,<span class="string">'LineWidth'</span>,1.4, <span class="keyword">...</span>
+0153              <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>, <span class="keyword">...</span>
+0154              <span class="string">'DisplayName'</span>,<span class="string">'Reference (Pakdel)'</span>);
+0155     <span class="keyword">end</span>
+0156 
+0157     line(ax,[0 0],[0 1],<span class="string">'Color'</span>,<span class="string">'k'</span>,<span class="string">'LineStyle'</span>,<span class="string">'--'</span>,<span class="string">'LineWidth'</span>,0.8, <span class="keyword">...</span>
+0158          <span class="string">'HandleVisibility'</span>,<span class="string">'off'</span>);
+0159 
+0160     xlabel(ax,<span class="string">'u'</span>,<span class="string">'FontSize'</span>,13);
+0161     ylabel(ax,<span class="string">'y/L'</span>,<span class="string">'FontSize'</span>,13);
+0162     title(ax,sprintf(<span class="string">'Re = %d'</span>,ReList(k)),<span class="string">'FontSize'</span>,14,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+0163     legend(ax,<span class="string">'Location'</span>,<span class="string">'northwest'</span>,<span class="string">'FontSize'</span>,10);
+0164     xlim(ax,[-0.7 1.1]); ylim(ax,[0 1]);
+0165     set(ax,<span class="string">'Box'</span>,<span class="string">'on'</span>); grid(ax,<span class="string">'on'</span>);
+0166 <span class="keyword">end</span>
+0167 title(tl4,<span class="string">'u-velocity Profile at x = 0.5  -  Validation'</span>, <span class="keyword">...</span>
+0168       <span class="string">'FontSize'</span>,15,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>,<span class="string">'FontName'</span>,<span class="string">'Times New Roman'</span>);
+0169 <a href="#_sub1" class="code" title="subfunction saveSVG(fig, name)">saveSVG</a>(f4,<span class="string">'fig4_validation'</span>);
+0170 
+0171 disp(<span class="string">'Done -- all figures saved as SVG.'</span>);
+0172 
+0173 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0174 <span class="comment">%  LOCAL FUNCTIONS</span>
+0175 <span class="comment">%% ════════════════════════════════════════════════════════════════════════</span>
+0176 <a name="_sub0" href="#_subfunctions" class="code">function saveSVG(fig, name)</a>
+0177     <span class="comment">% Uses print for reliable SVG output</span>
+0178     print(fig, name, <span class="string">'-dsvg'</span>, <span class="string">'-r0'</span>);
+0179     fprintf(<span class="string">'Saved  %s.svg\n'</span>, name);
+0180 <span class="keyword">end</span>
+0181 
+0182 <a name="_sub1" href="#_subfunctions" class="code">function val = pf(S, fn, candidates)</a>
+0183     fl = cellfun(@lower, fn, <span class="string">'UniformOutput'</span>, false);
+0184     <span class="keyword">for</span> c = 1:numel(candidates)
+0185         idx = find(strcmp(fl, lower(candidates{c})),1);
+0186         <span class="keyword">if</span> ~isempty(idx), val = S.(fn{idx})(:); <span class="keyword">return</span>; <span class="keyword">end</span>
+0187     <span class="keyword">end</span>
+0188     error(<span class="string">'Field not found. Tried: %s'</span>, strjoin(candidates,<span class="string">', '</span>));
+0189 <span class="keyword">end</span>
+0190 
+0191 <a name="_sub2" href="#_subfunctions" class="code">function cmap = redblue(n)</a>
+0192     <span class="keyword">if</span> nargin&lt;1, n=256; <span class="keyword">end</span>
+0193     h  = floor(n/2);
+0194     b  = [linspace(0.17,1,h)', linspace(0.27,1,h)', linspace(0.73,1,h)'];
+0195     r  = [linspace(1,0.70,n-h)', linspace(1,0.02,n-h)', linspace(1,0.12,n-h)'];
+0196     cmap = [b; r];
+0197 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

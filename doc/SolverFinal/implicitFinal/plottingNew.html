@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plottingNew</title>
+  <meta name="keywords" content="plottingNew">
+  <meta name="description" content="plottingNew - Plotting New.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">implicitFinal</a> &gt; plottingNew.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\implicitFinal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>plottingNew
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>plottingNew - Plotting New.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function cmap = coolwarm_map(n) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> plottingNew - Plotting New.
+
+ FILE: plottingNew.m
+ DESCRIPTION:
+ Post-processing and plotting utilities for simulation results: loads
+ saved MAT results and reference CSVs, and produces publication-ready
+ figures (streamlines, contours, profiles, convergence plots).
+
+ Inputs:
+   n : Number of discrete utilities or default argument placeholder (see specific functions below).
+ Outputs:
+   none
+ Syntax: [cmap] = coolwarm_map(n)
+
+ Inputs:
+   n : Number of discrete colors to generate (integer, default 256).
+
+ Outputs:
+   cmap : n-by-3 RGB colormap array.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% plottingNew - Plotting New.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% FILE: plottingNew.m</span>
+0004 <span class="comment">% DESCRIPTION:</span>
+0005 <span class="comment">% Post-processing and plotting utilities for simulation results: loads</span>
+0006 <span class="comment">% saved MAT results and reference CSVs, and produces publication-ready</span>
+0007 <span class="comment">% figures (streamlines, contours, profiles, convergence plots).</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Inputs:</span>
+0010 <span class="comment">%   n : Number of discrete utilities or default argument placeholder (see specific functions below).</span>
+0011 <span class="comment">% Outputs:</span>
+0012 <span class="comment">%   none</span>
+0013 <a name="_sub0" href="#_subfunctions" class="code">function cmap = coolwarm_map(n)</a>
+0014 <span class="comment">% Syntax: [cmap] = coolwarm_map(n)</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Inputs:</span>
+0017 <span class="comment">%   n : Number of discrete colors to generate (integer, default 256).</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% Outputs:</span>
+0020 <span class="comment">%   cmap : n-by-3 RGB colormap array.</span>
+0021     <span class="keyword">if</span> nargin &lt; 1; n = 256; <span class="keyword">end</span>
+0022     top    = [0.230 0.299 0.754];   <span class="comment">% cool blue</span>
+0023     mid    = [0.865 0.865 0.865];   <span class="comment">% neutral grey-white</span>
+0024     bot    = [0.706 0.016 0.150];   <span class="comment">% warm red</span>
+0025     half   = ceil(n/2);
+0026     c1 = interp1([0 1], [top; mid], linspace(0,1,half));
+0027     c2 = interp1([0 1], [mid; bot], linspace(0,1,n-half+1));
+0028     cmap   = [c1; c2(2:<span class="keyword">end</span>,:)];
+0029 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

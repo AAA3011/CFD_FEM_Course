@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of getElementRelated</title>
+  <meta name="keywords" content="getElementRelated">
+  <meta name="description" content="getElementRelated - Return Element Related.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">cylinderFinal</a> &gt; getElementRelated.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\cylinderFinal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>getElementRelated
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>getElementRelated - Return Element Related.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [elementNodes_vec,xNodesVals_vec,yNodesVals_vec,unNodes_cvec,vnNodes_cvec,pressureSolutionNodes_cvec]=getElementRelated(connectivityMatrix_mat,xCoord_vec,yCoord_vec,un_cvec,vn_cvec,pressureSolution_cvec,elementNumber) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> getElementRelated - Return Element Related.
+
+ FILE: getElementRelated.m
+ DESCRIPTION:
+ Utility to extract element-specific data from global arrays. Returns
+ node indices, coordinates, and solution values for a given element.
+ Currently a stub (not used in main.m).
+
+ Inputs:
+   connectivityMatrix_mat (matrix): Element connectivity matrix (nElements x nodesPerElement)
+   xCoord_vec (column vector): Nodal x-coordinates of the mesh.
+   yCoord_vec (column vector): Nodal y-coordinates of the mesh.
+   un_cvec (column vector): Nodal u-velocity values for the current field.
+   vn_cvec (column vector): Nodal v-velocity values for the current field.
+   pressureSolution_cvec (column vector): Nodal pressure values for the current field.
+   elementNumber (variable): Current element index in assembly or evaluation loops.
+ Outputs:
+   elementNodes_vec : Element node indices for the current element.
+   xNodesVals_vec : Element nodal x-coordinates.
+   yNodesVals_vec : Element nodal y-coordinates.
+   unNodes_cvec : Node index vector or coordinates
+   vnNodes_cvec : Node index vector or coordinates
+   pressureSolutionNodes_cvec : Node index vector or coordinates</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% getElementRelated - Return Element Related.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% FILE: getElementRelated.m</span>
+0004 <span class="comment">% DESCRIPTION:</span>
+0005 <span class="comment">% Utility to extract element-specific data from global arrays. Returns</span>
+0006 <span class="comment">% node indices, coordinates, and solution values for a given element.</span>
+0007 <span class="comment">% Currently a stub (not used in main.m).</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Inputs:</span>
+0010 <span class="comment">%   connectivityMatrix_mat (matrix): Element connectivity matrix (nElements x nodesPerElement)</span>
+0011 <span class="comment">%   xCoord_vec (column vector): Nodal x-coordinates of the mesh.</span>
+0012 <span class="comment">%   yCoord_vec (column vector): Nodal y-coordinates of the mesh.</span>
+0013 <span class="comment">%   un_cvec (column vector): Nodal u-velocity values for the current field.</span>
+0014 <span class="comment">%   vn_cvec (column vector): Nodal v-velocity values for the current field.</span>
+0015 <span class="comment">%   pressureSolution_cvec (column vector): Nodal pressure values for the current field.</span>
+0016 <span class="comment">%   elementNumber (variable): Current element index in assembly or evaluation loops.</span>
+0017 <span class="comment">% Outputs:</span>
+0018 <span class="comment">%   elementNodes_vec : Element node indices for the current element.</span>
+0019 <span class="comment">%   xNodesVals_vec : Element nodal x-coordinates.</span>
+0020 <span class="comment">%   yNodesVals_vec : Element nodal y-coordinates.</span>
+0021 <span class="comment">%   unNodes_cvec : Node index vector or coordinates</span>
+0022 <span class="comment">%   vnNodes_cvec : Node index vector or coordinates</span>
+0023 <span class="comment">%   pressureSolutionNodes_cvec : Node index vector or coordinates</span>
+0024 <a name="_sub0" href="#_subfunctions" class="code">function [elementNodes_vec,xNodesVals_vec,yNodesVals_vec,unNodes_cvec,vnNodes_cvec,pressureSolutionNodes_cvec]=getElementRelated(connectivityMatrix_mat,xCoord_vec,yCoord_vec,un_cvec,vn_cvec,pressureSolution_cvec,elementNumber)</a>
+0025 
+0026 
+0027 
+0028 
+0029 
+0030 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

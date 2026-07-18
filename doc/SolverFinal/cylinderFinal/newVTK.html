@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of newVTK</title>
+  <meta name="keywords" content="newVTK">
+  <meta name="description" content="newVTK - Write VTK output files.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">cylinderFinal</a> &gt; newVTK.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\cylinderFinal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>newVTK
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>newVTK - Write VTK output files.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function newVTK(xCoord_vec, yCoord_vec, un_cvec, vn_cvec, connectivityMatrix_mat, pressureSolution_cvec, filename, time) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> newVTK - Write VTK output files.
+
+
+ Prepares node and cell data and writes the VTK file used for visualization.
+
+ Inputs:
+   xCoord_vec (column vector): Nodal x-coordinates of the mesh.
+   yCoord_vec (column vector): Nodal y-coordinates of the mesh.
+   un_cvec (column vector): Nodal u-velocity values for the current field.
+   vn_cvec (column vector): Nodal v-velocity values for the current field.
+   connectivityMatrix_mat (matrix): Element connectivity matrix (nElements x nodesPerElement)
+   pressureSolution_cvec (column vector): Nodal pressure values for the current field.
+   filename (variable): Output file name (string).
+   time (variable): Time step (scalar)
+ Outputs:
+   none
+ Prepare data for export</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="writeFinalVTK.html" class="code" title="function []=writeFinalVTK(xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time,outputFolder)">writeFinalVTK</a>	writeFinalVTK - Write VTK output files.</li><li><a href="writeVTKatInterval.html" class="code" title="function []=writeVTKatInterval(outputFolder,itr,xCoord_vec,yCoord_vec,un_col,vn_col,connectivityMatrix_mat,pressureSolution_col,time)">writeVTKatInterval</a>	writeVTKatInterval - Write VTK output files.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% newVTK - Write VTK output files.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Prepares node and cell data and writes the VTK file used for visualization.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Inputs:</span>
+0007 <span class="comment">%   xCoord_vec (column vector): Nodal x-coordinates of the mesh.</span>
+0008 <span class="comment">%   yCoord_vec (column vector): Nodal y-coordinates of the mesh.</span>
+0009 <span class="comment">%   un_cvec (column vector): Nodal u-velocity values for the current field.</span>
+0010 <span class="comment">%   vn_cvec (column vector): Nodal v-velocity values for the current field.</span>
+0011 <span class="comment">%   connectivityMatrix_mat (matrix): Element connectivity matrix (nElements x nodesPerElement)</span>
+0012 <span class="comment">%   pressureSolution_cvec (column vector): Nodal pressure values for the current field.</span>
+0013 <span class="comment">%   filename (variable): Output file name (string).</span>
+0014 <span class="comment">%   time (variable): Time step (scalar)</span>
+0015 <span class="comment">% Outputs:</span>
+0016 <span class="comment">%   none</span>
+0017 <a name="_sub0" href="#_subfunctions" class="code">function newVTK(xCoord_vec, yCoord_vec, un_cvec, vn_cvec, connectivityMatrix_mat, pressureSolution_cvec, filename, time)</a>
+0018     <span class="comment">% Prepare data for export</span>
+0019     xNodes = xCoord_vec;
+0020     yNodes = yCoord_vec;
+0021     zNodes = zeros(size(xNodes)); <span class="comment">% Create a z-vector of zeros for 2D data</span>
+0022     
+0023     <span class="comment">% Combine velocity components into a vector field</span>
+0024     velocityVector = [un_cvec, vn_cvec, zeros(length(un_cvec), 1)];
+0025     
+0026     <span class="comment">% Calculate velocity magnitude</span>
+0027     velocityMagnitude = sqrt(un_cvec.^2 + vn_cvec.^2);
+0028     
+0029     <span class="comment">% Open file for writing</span>
+0030     fid = fopen(filename, <span class="string">'w'</span>);
+0031     
+0032     <span class="comment">% Write VTK header with time information</span>
+0033     fprintf(fid, <span class="string">'# vtk DataFile Version 2.0\n'</span>);
+0034     fprintf(fid, <span class="string">'Flow Simulation - Time: %.6f\n'</span>, time);
+0035     fprintf(fid, <span class="string">'ASCII\n'</span>);
+0036     fprintf(fid, <span class="string">'DATASET UNSTRUCTURED_GRID\n\n'</span>);
+0037     
+0038     <span class="comment">% Write points</span>
+0039     fprintf(fid, <span class="string">'POINTS %d float\n'</span>, length(xNodes));
+0040     <span class="keyword">for</span> i = 1:length(xNodes)
+0041         fprintf(fid, <span class="string">'%.6f %.6f %.6f\n'</span>, xNodes(i), yNodes(i), zNodes(i));
+0042     <span class="keyword">end</span>
+0043     fprintf(fid, <span class="string">'\n'</span>);
+0044     
+0045     <span class="comment">% Write cells (elements)</span>
+0046     numElements = size(connectivityMatrix_mat, 1);
+0047     numNodesPerElement = size(connectivityMatrix_mat, 2);
+0048     
+0049     <span class="comment">% Calculate total size: 5 integers per element (1 for count + 4 node indices)</span>
+0050     totalSize = numElements * (1 + numNodesPerElement);
+0051     
+0052     fprintf(fid, <span class="string">'CELLS %d %d\n'</span>, numElements, totalSize);
+0053     <span class="keyword">for</span> i = 1:numElements
+0054         <span class="comment">% VTK uses zero-based indexing, so subtract 1 from node numbers</span>
+0055         nodes = connectivityMatrix_mat(i, :) - 1;
+0056         fprintf(fid, <span class="string">'%d'</span>, numNodesPerElement);
+0057         <span class="keyword">for</span> j = 1:numNodesPerElement
+0058             fprintf(fid, <span class="string">' %d'</span>, nodes(j));
+0059         <span class="keyword">end</span>
+0060         fprintf(fid, <span class="string">'\n'</span>);
+0061     <span class="keyword">end</span>
+0062     fprintf(fid, <span class="string">'\n'</span>);
+0063     
+0064     <span class="comment">% Write cell types</span>
+0065     fprintf(fid, <span class="string">'CELL_TYPES %d\n'</span>, numElements);
+0066     <span class="keyword">if</span> numNodesPerElement == 4
+0067         cellType = 9; <span class="comment">% VTK_QUAD</span>
+0068     <span class="keyword">elseif</span> numNodesPerElement == 3
+0069         cellType = 5; <span class="comment">% VTK_TRIANGLE</span>
+0070     <span class="keyword">else</span>
+0071         cellType = 7; <span class="comment">% VTK_POLYGON (generic)</span>
+0072     <span class="keyword">end</span>
+0073     fprintf(fid, <span class="string">'%d\n'</span>, repmat(cellType, numElements, 1));
+0074     fprintf(fid, <span class="string">'\n'</span>);
+0075     
+0076     <span class="comment">% Write FIELD data (global data - only 1 tuple) BEFORE point data</span>
+0077     fprintf(fid, <span class="string">'FIELD FieldData 2\n'</span>);
+0078     fprintf(fid, <span class="string">'TIME 1 1 double\n'</span>);
+0079     fprintf(fid, <span class="string">'%.6f\n'</span>, time);
+0080     fprintf(fid, <span class="string">'CYCLE 1 1 int\n'</span>);
+0081     fprintf(fid, <span class="string">'%d\n'</span>, round(time/0.005));
+0082     fprintf(fid, <span class="string">'\n'</span>);
+0083     
+0084     <span class="comment">% Write point data</span>
+0085     fprintf(fid, <span class="string">'POINT_DATA %d\n'</span>, length(xNodes));
+0086     
+0087     <span class="comment">% Write velocity vectors</span>
+0088     fprintf(fid, <span class="string">'VECTORS velocity float\n'</span>);
+0089     <span class="keyword">for</span> i = 1:length(velocityVector)
+0090         fprintf(fid, <span class="string">'%.6f %.6f %.6f\n'</span>, velocityVector(i, 1), velocityVector(i, 2), velocityVector(i, 3));
+0091     <span class="keyword">end</span>
+0092     fprintf(fid, <span class="string">'\n'</span>);
+0093     
+0094     <span class="comment">% Write pressure scalar field</span>
+0095     fprintf(fid, <span class="string">'SCALARS pressure float\n'</span>);
+0096     fprintf(fid, <span class="string">'LOOKUP_TABLE default\n'</span>);
+0097     <span class="keyword">for</span> i = 1:length(pressureSolution_cvec)
+0098         fprintf(fid, <span class="string">'%.6f\n'</span>, pressureSolution_cvec(i));
+0099     <span class="keyword">end</span>
+0100     fprintf(fid, <span class="string">'\n'</span>);
+0101     
+0102     <span class="comment">% Write velocity magnitude scalar field</span>
+0103     fprintf(fid, <span class="string">'SCALARS velocity_magnitude float\n'</span>);
+0104     fprintf(fid, <span class="string">'LOOKUP_TABLE default\n'</span>);
+0105     <span class="keyword">for</span> i = 1:length(velocityMagnitude)
+0106         fprintf(fid, <span class="string">'%.6f\n'</span>, velocityMagnitude(i));
+0107     <span class="keyword">end</span>
+0108     
+0109     <span class="comment">% Close file</span>
+0110     fclose(fid);
+0111 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

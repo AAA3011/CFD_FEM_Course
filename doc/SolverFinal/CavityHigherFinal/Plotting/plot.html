@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plot</title>
+  <meta name="keywords" content="plot">
+  <meta name="description" content="plot - For Preprocessing.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="../index.html">CavityHigherFinal</a> &gt; <a href="index.html">Plotting</a> &gt; plot.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../../index.html"><img alt="<" border="0" src="../../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\CavityHigherFinal\Plotting&nbsp;<img alt=">" border="0" src="../../../right.png"></a></td></tr></table>-->
+
+<h1>plot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>plot - For Preprocessing.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>function saveSVG(fig, name) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> plot - For Preprocessing.
+
+ fig2_speed.svg         – |u| contours,            1x3 panel
+ fig3_pressure.svg      – pressure,                1x3 panel
+ fig4_validation.svg     – u-profile,               1x3 panel (wide)
+ fig5_meshComparison.svg – solution mesh (row 1) vs geometry mesh
+ (row 2), one column per Re case, 2x3 panel
+
+ Requires .mat files saved with: uSolution_col, vSolution_col,
+ pressureSolution_col, xCoord_vec, yCoord_vec, connectivityMatrix_mat,
+ xCoordGeo_vec, yCoordGeo_vec, connectivityMatrixGeo_mat
+ (geometry row shows a placeholder message if those fields aren't found)
+ plot.m
+ Description: Create and save validation and visualization figures from
+ previously saved simulation .mat files (u, v, p, meshes).
+ Inputs:
+   fig : MATLAB figure handle to save (e.g., gcf or a handle returned by figure()).
+   name : File name or base name (string) for the saved SVG (no path required).
+ Outputs:
+   none
+ Uses print for reliable SVG output</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function val = pf(S, fn, candidates)</a></li><li><a href="#_sub2" class="code">function val = pfmat(S, fn, candidates)</a></li><li><a href="#_sub3" class="code">function val = pfopt(S, fn, candidates, isMatrix)</a></li><li><a href="#_sub4" class="code">function plotMeshEdges(conn, x, y, color)</a></li><li><a href="#_sub5" class="code">function cmap = redblue(n)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% plot - For Preprocessing.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% fig2_speed.svg         – |u| contours,            1x3 panel</span>
+0004 <span class="comment">% fig3_pressure.svg      – pressure,                1x3 panel</span>
+0005 <span class="comment">% fig4_validation.svg     – u-profile,               1x3 panel (wide)</span>
+0006 <span class="comment">% fig5_meshComparison.svg – solution mesh (row 1) vs geometry mesh</span>
+0007 <span class="comment">% (row 2), one column per Re case, 2x3 panel</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Requires .mat files saved with: uSolution_col, vSolution_col,</span>
+0010 <span class="comment">% pressureSolution_col, xCoord_vec, yCoord_vec, connectivityMatrix_mat,</span>
+0011 <span class="comment">% xCoordGeo_vec, yCoordGeo_vec, connectivityMatrixGeo_mat</span>
+0012 <span class="comment">% (geometry row shows a placeholder message if those fields aren't found)</span>
+0013 <span class="comment">% plot.m</span>
+0014 <span class="comment">% Description: Create and save validation and visualization figures from</span>
+0015 <span class="comment">% previously saved simulation .mat files (u, v, p, meshes).</span>
+0016 <span class="comment">% Inputs:</span>
+0017 <span class="comment">%   fig : MATLAB figure handle to save (e.g., gcf or a handle returned by figure()).</span>
+0018 <span class="comment">%   name : File name or base name (string) for the saved SVG (no path required).</span>
+0019 <span class="comment">% Outputs:</span>
+0020 <span class="comment">%   none</span>
+0021 <a name="_sub0" href="#_subfunctions" class="code">function saveSVG(fig, name)</a>
+0022     <span class="comment">% Uses print for reliable SVG output</span>
+0023     print(fig, name, <span class="string">'-dsvg'</span>, <span class="string">'-r0'</span>);
+0024     fprintf(<span class="string">'Saved  %s.svg\n'</span>, name);
+0025 <span class="keyword">end</span>
+0026 
+0027 <a name="_sub1" href="#_subfunctions" class="code">function val = pf(S, fn, candidates)</a>
+0028     fl = cellfun(@lower, fn, <span class="string">'UniformOutput'</span>, false);
+0029     <span class="keyword">for</span> c = 1:numel(candidates)
+0030         idx = find(strcmp(fl, lower(candidates{c})),1);
+0031         <span class="keyword">if</span> ~isempty(idx), val = S.(fn{idx})(:); <span class="keyword">return</span>; <span class="keyword">end</span>
+0032     <span class="keyword">end</span>
+0033     error(<span class="string">'Field not found. Tried: %s'</span>, strjoin(candidates,<span class="string">', '</span>));
+0034 <span class="keyword">end</span>
+0035 
+0036 <a name="_sub2" href="#_subfunctions" class="code">function val = pfmat(S, fn, candidates)</a>
+0037     <span class="comment">% Like pf, but does NOT flatten -- use for connectivity matrices</span>
+0038     <span class="comment">% (numElements x nodesPerElement), where shape must be preserved.</span>
+0039     fl = cellfun(@lower, fn, <span class="string">'UniformOutput'</span>, false);
+0040     <span class="keyword">for</span> c = 1:numel(candidates)
+0041         idx = find(strcmp(fl, lower(candidates{c})),1);
+0042         <span class="keyword">if</span> ~isempty(idx), val = S.(fn{idx}); <span class="keyword">return</span>; <span class="keyword">end</span>
+0043     <span class="keyword">end</span>
+0044     error(<span class="string">'Field not found. Tried: %s'</span>, strjoin(candidates,<span class="string">', '</span>));
+0045 <span class="keyword">end</span>
+0046 
+0047 <a name="_sub3" href="#_subfunctions" class="code">function val = pfopt(S, fn, candidates, isMatrix)</a>
+0048     <span class="comment">% Like pf/pfmat, but returns [] instead of erroring if the field is</span>
+0049     <span class="comment">% missing (for optional fields like geometry mesh data that may not</span>
+0050     <span class="comment">% exist in older saved .mat files).</span>
+0051     fl = cellfun(@lower, fn, <span class="string">'UniformOutput'</span>, false);
+0052     <span class="keyword">for</span> c = 1:numel(candidates)
+0053         idx = find(strcmp(fl, lower(candidates{c})),1);
+0054         <span class="keyword">if</span> ~isempty(idx)
+0055             <span class="keyword">if</span> isMatrix, val = S.(fn{idx}); <span class="keyword">else</span>, val = S.(fn{idx})(:); <span class="keyword">end</span>
+0056             <span class="keyword">return</span>;
+0057         <span class="keyword">end</span>
+0058     <span class="keyword">end</span>
+0059     val = [];
+0060 <span class="keyword">end</span>
+0061 
+0062 <a name="_sub4" href="#_subfunctions" class="code">function plotMeshEdges(conn, x, y, color)</a>
+0063     <span class="comment">% Draws element outlines for a structured quad mesh (works for both</span>
+0064     <span class="comment">% Q4 geometry elements and higher-order solution elements). Node</span>
+0065     <span class="comment">% ordering within an element isn't assumed -- the outline is drawn</span>
+0066     <span class="comment">% via the convex hull of each element's nodes, which gives the</span>
+0067     <span class="comment">% correct quad boundary for both straight-edged and higher-order</span>
+0068     <span class="comment">% (curved-looking) elements on a structured mesh.</span>
+0069     hold on;
+0070     numEl = size(conn,1);
+0071     <span class="keyword">for</span> e = 1:numEl
+0072         nodes = conn(e,:);
+0073         xe = x(nodes); ye = y(nodes);
+0074         <span class="keyword">if</span> numel(xe) &gt;= 3
+0075             k = convhull(xe(:), ye(:));
+0076             patch(xe(k), ye(k), <span class="string">'w'</span>, <span class="string">'FaceColor'</span>,<span class="string">'none'</span>, <span class="keyword">...</span>
+0077                   <span class="string">'EdgeColor'</span>, color, <span class="string">'LineWidth'</span>, 0.8);
+0078         <span class="keyword">end</span>
+0079     <span class="keyword">end</span>
+0080     line(x, y, <span class="string">'LineStyle'</span>,<span class="string">'none'</span>, <span class="string">'Marker'</span>,<span class="string">'.'</span>, <span class="keyword">...</span>
+0081          <span class="string">'Color'</span>, color*0.6, <span class="string">'MarkerSize'</span>, 4);
+0082     hold off;
+0083 <span class="keyword">end</span>
+0084 
+0085 <a name="_sub5" href="#_subfunctions" class="code">function cmap = redblue(n)</a>
+0086     <span class="keyword">if</span> nargin&lt;1, n=256; <span class="keyword">end</span>
+0087     h  = floor(n/2);
+0088     b  = [linspace(0.17,1,h)', linspace(0.27,1,h)', linspace(0.73,1,h)'];
+0089     r  = [linspace(1,0.70,n-h)', linspace(1,0.02,n-h)', linspace(1,0.12,n-h)'];
+0090     cmap = [b; r];
+0091 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

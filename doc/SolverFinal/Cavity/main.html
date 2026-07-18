@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of main</title>
+  <meta name="keywords" content="main">
+  <meta name="description" content="main - Main simulation driver.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">Cavity</a> &gt; main.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\Cavity&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>main
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>main - Main simulation driver.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> main - Main simulation driver.
+
+ It creates the mesh, builds the global matrices, solves the pressure and
+ velocity fields, plots the results, and saves the solution to a .mat file.
+
+ Syntax: main()
+
+ Inputs: none
+
+ Outputs: none</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="computeLocalNS.html" class="code" title="function [urhs_col,vrhs_col,ReLocal,cfl,xCenter,yCenter] = computeLocalNS(elementData,unNodes_col,vnNodes_col,pressureSolution_col,Re,timeStep)">computeLocalNS</a>	computeLocalNS - Compute local NS.</li><li><a href="computeLocalNSP.html" class="code" title="function [pk_mat,umlv_col,vmlv_col] = computeLocalNSP(elementData)">computeLocalNSP</a>	computeLocalNSP - Compute local NSP.</li><li><a href="computePressure.html" class="code" title="function[pressureSolution_col] = computePressure(elementData,numElements,pBCNodes_vec,pK_mat,totNumNodes,un_col,vn_col,epslon)">computePressure</a>	computePressure - Compute the global pressure system.</li><li><a href="getGaussRelated.html" class="code" title="function [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesVals_vec,yNodesVals_vec,n_ElementType,numGaussPoints)">getGaussRelated</a>	getGaussRelated - Return Gauss Related.</li><li><a href="structuredMesh.html" class="code" title="function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin)">structuredMesh</a>	structuredMesh - Create structured quadrilateral mesh.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% main - Main simulation driver.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% It creates the mesh, builds the global matrices, solves the pressure and</span>
+0004 <span class="comment">% velocity fields, plots the results, and saves the solution to a .mat file.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Syntax: main()</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Inputs: none</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Outputs: none</span>
+0011 <span class="comment">%</span>
+0012 
+0013 clc;clearvars;close all;
+0014 tic
+0015 <span class="comment">%% Global parameters</span>
+0016 epslon    = 0.001;
+0017 Re        = 10;
+0018 timeStep  = 0.0005;
+0019 
+0020 <span class="comment">%% Mesh setup</span>
+0021 numElementsX = 4;
+0022 numElementsY = 4;
+0023 numNodesX    = numElementsX + 1;
+0024 numNodesY    = numElementsY + 1;
+0025 totNumNodes  = numNodesX * numNodesY;
+0026 lengthX      = 1;
+0027 lengthY      = 1;
+0028 xMin         = 0;
+0029 yMin         = 0;
+0030 
+0031 [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = <a href="structuredMesh.html" class="code" title="function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin)">structuredMesh</a>(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin);
+0032 
+0033 <span class="comment">%% Precompute geometric data for all elements</span>
+0034 numElements    = size(connectivityMatrix_mat,1);
+0035 elementData    = cell(numElements, 1);
+0036 numGaussPoints = 4;
+0037 n_ElementType  = 1;
+0038 
+0039 <span class="keyword">for</span> eleNum = 1:numElements
+0040 
+0041     elementData{eleNum}.Nodes           = connectivityMatrix_mat(eleNum,:);
+0042     elementData{eleNum}.xNodesVals_vec  = xCoord_vec(elementData{eleNum}.Nodes);
+0043     elementData{eleNum}.yNodesVals_vec  = yCoord_vec(elementData{eleNum}.Nodes);
+0044 
+0045     [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = <a href="getGaussRelated.html" class="code" title="function [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesVals_vec,yNodesVals_vec,n_ElementType,numGaussPoints)">getGaussRelated</a>(elementData{eleNum}.xNodesVals_vec,elementData{eleNum}.yNodesVals_vec,n_ElementType,numGaussPoints);
+0046 
+0047     elementData{eleNum}.weights    = weights_pages;
+0048     elementData{eleNum}.N_row      = N_row_points_pages;
+0049     elementData{eleNum}.J_det      = J_det_points_elev;
+0050     elementData{eleNum}.dNdX       = N_diff_PhysCoords_points_rows_pages(1, :, :);
+0051     elementData{eleNum}.dNdY       = N_diff_PhysCoords_points_rows_pages(2, :, :);
+0052     elementData{eleNum}.physCoords = ElementPhysCoords_mat;
+0053 
+0054 <span class="keyword">end</span>
+0055 
+0056 <span class="comment">%% Build global matrices</span>
+0057 pK_mat   = zeros(totNumNodes,totNumNodes);
+0058 uMLV_col = zeros(totNumNodes,1);
+0059 vMLV_col = zeros(totNumNodes,1);
+0060 
+0061 <span class="keyword">for</span> eleNum = 1:size(connectivityMatrix_mat,1)
+0062 
+0063     elementNodes_vec = elementData{eleNum}.Nodes;
+0064 
+0065     [pk_mat,umlv_col,vmlv_col] = <a href="computeLocalNSP.html" class="code" title="function [pk_mat,umlv_col,vmlv_col] = computeLocalNSP(elementData)">computeLocalNSP</a>(elementData{eleNum});
+0066 
+0067     pK_mat(elementNodes_vec,elementNodes_vec) = pK_mat(elementNodes_vec,elementNodes_vec) + pk_mat;
+0068     uMLV_col(elementNodes_vec)                = uMLV_col(elementNodes_vec)               + umlv_col';
+0069     vMLV_col(elementNodes_vec)                = vMLV_col(elementNodes_vec)               + vmlv_col';
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="comment">%% Boundary condition locations</span>
+0073 ind_vec = 1:length(xCoord_vec);
+0074 
+0075 pBCCondition_vec       = (xCoord_vec == lengthX/2) &amp; (yCoord_vec == 0);
+0076 upperWallNoCorners_vec = (yCoord_vec == lengthY)   &amp; (xCoord_vec ~= lengthX) &amp; (xCoord_vec ~= 0);
+0077 rightWallNoCorner_vec  = (xCoord_vec == lengthX)   &amp; (yCoord_vec ~= lengthY);
+0078 leftWallNoCorner_vec   = (xCoord_vec == 0)         &amp; (yCoord_vec ~= lengthY);
+0079 upperLeftCorner_vec    = (xCoord_vec == 0)         &amp; (yCoord_vec == lengthY);
+0080 upperRightCorner_vec   = (xCoord_vec == lengthX)   &amp; (yCoord_vec == lengthY);
+0081 lowerWall_vec          =  yCoord_vec == 0;
+0082 xEqualHalf             =  xCoord_vec == 0.5;
+0083 
+0084 <span class="comment">%% Prepare the pressure matrix</span>
+0085 pBCNodes_vec                      = ind_vec(pBCCondition_vec);
+0086 pK_mat(pBCNodes_vec,:)            = 0;
+0087 pK_mat(pBCNodes_vec,pBCNodes_vec) = eye(length(pBCNodes_vec));
+0088 
+0089 <span class="comment">%% Initial values</span>
+0090 un_col = zeros(totNumNodes,1);
+0091 vn_col = zeros(totNumNodes,1);
+0092 
+0093 <span class="comment">%% Iteration controls</span>
+0094 itr     = 0;
+0095 totitrs = 1130;
+0096 pK_mat  = decomposition(pK_mat);   <span class="comment">% this line to enhance performance</span>
+0097 
+0098 <span class="keyword">while</span>(itr &lt; totitrs)
+0099 
+0100     pressureSolution_col = <a href="computePressure.html" class="code" title="function[pressureSolution_col] = computePressure(elementData,numElements,pBCNodes_vec,pK_mat,totNumNodes,un_col,vn_col,epslon)">computePressure</a>(elementData,numElements,pBCNodes_vec,pK_mat,totNumNodes,un_col,vn_col,epslon);
+0101 
+0102     uRHS_col    = zeros(totNumNodes,1);
+0103     vRHS_col    = zeros(totNumNodes,1);
+0104     ReLocal_col = zeros(numElements,1);
+0105     CFL_col     = zeros(numElements,1);
+0106     xCenter_col = zeros(numElements,1);
+0107     yCenter_col = zeros(numElements,1);
+0108 
+0109     <span class="keyword">for</span> eleNum = 1:numElements
+0110 
+0111         elementNodes_vec  = elementData{eleNum}.Nodes;
+0112         
+0113         unNodes_col                = un_col(elementNodes_vec,1);
+0114         vnNodes_col                = vn_col(elementNodes_vec,1);
+0115         pressureSolutionNodes_col  = pressureSolution_col(elementNodes_vec,1);
+0116 
+0117         [urhs_col,vrhs_col,ReLocal,cfl,xCenter,yCenter] = <a href="computeLocalNS.html" class="code" title="function [urhs_col,vrhs_col,ReLocal,cfl,xCenter,yCenter] = computeLocalNS(elementData,unNodes_col,vnNodes_col,pressureSolution_col,Re,timeStep)">computeLocalNS</a>(elementData{eleNum},unNodes_col,vnNodes_col,pressureSolutionNodes_col,Re,timeStep);
+0118 
+0119         uRHS_col(elementNodes_vec)  = uRHS_col(elementNodes_vec)   + urhs_col;
+0120         vRHS_col(elementNodes_vec)  = vRHS_col(elementNodes_vec)   + vrhs_col;
+0121 
+0122         ReLocal_col(eleNum)  = ReLocal;
+0123         CFL_col(eleNum)      = cfl;
+0124         xCenter_col(eleNum)  = xCenter;
+0125         yCenter_col(eleNum)  = yCenter;
+0126 
+0127     <span class="keyword">end</span>
+0128 
+0129     <span class="comment">%% Apply boundary conditions for u velocity</span>
+0130     uRHS_col(ind_vec(lowerWall_vec))          = 0;
+0131     uRHS_col(ind_vec(upperWallNoCorners_vec)) = 1;
+0132     uRHS_col(ind_vec(rightWallNoCorner_vec))  = 0;
+0133     uRHS_col(ind_vec(leftWallNoCorner_vec))   = 0;
+0134     uRHS_col(ind_vec(upperLeftCorner_vec))    = 1;
+0135     uRHS_col(ind_vec(upperRightCorner_vec))   = 1;
+0136 
+0137     uMLV_col(ind_vec(lowerWall_vec))          = 1;
+0138     uMLV_col(ind_vec(upperWallNoCorners_vec)) = 1;
+0139     uMLV_col(ind_vec(rightWallNoCorner_vec))  = 1;
+0140     uMLV_col(ind_vec(leftWallNoCorner_vec))   = 1;
+0141     uMLV_col(ind_vec(upperLeftCorner_vec))    = 1;
+0142     uMLV_col(ind_vec(upperRightCorner_vec))   = 1;
+0143 
+0144     <span class="comment">%% Apply boundary conditions for v velocity</span>
+0145     vRHS_col(ind_vec(lowerWall_vec))          = 0;
+0146     vRHS_col(ind_vec(upperWallNoCorners_vec)) = 0;
+0147     vRHS_col(ind_vec(rightWallNoCorner_vec))  = 0;
+0148     vRHS_col(ind_vec(leftWallNoCorner_vec))   = 0;
+0149     vRHS_col(ind_vec(upperLeftCorner_vec))    = 0;
+0150     vRHS_col(ind_vec(upperRightCorner_vec))   = 0;
+0151 
+0152     vMLV_col(ind_vec(lowerWall_vec))          = 1;
+0153     vMLV_col(ind_vec(upperWallNoCorners_vec)) = 1;
+0154     vMLV_col(ind_vec(rightWallNoCorner_vec))  = 1;
+0155     vMLV_col(ind_vec(leftWallNoCorner_vec))   = 1;
+0156     vMLV_col(ind_vec(upperLeftCorner_vec))    = 1;
+0157     vMLV_col(ind_vec(upperRightCorner_vec))   = 1;
+0158 
+0159     <span class="comment">%% Solve for u velocity</span>
+0160     uSolution_col = uRHS_col./uMLV_col;
+0161 
+0162     <span class="comment">%% Solve for v velocity</span>
+0163     vSolution_col = vRHS_col./vMLV_col;
+0164 
+0165     <span class="comment">%% Use the new values as the next initial guess</span>
+0166     un_col  = uSolution_col;
+0167     vn_col  = vSolution_col;
+0168 
+0169     <span class="comment">%% Step forward in time</span>
+0170     itr = itr + 1;
+0171     disp(itr)
+0172 
+0173 <span class="keyword">end</span>
+0174 toc
+0175 
+0176 
+0177 <span class="comment">%% Save results</span>
+0178 <span class="comment">% save('cavity_resultsRe10.mat', 'uSolution_col', 'vSolution_col', 'pressureSolution_col', 'xCoord_vec', 'yCoord_vec', 'connectivityMatrix_mat');</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

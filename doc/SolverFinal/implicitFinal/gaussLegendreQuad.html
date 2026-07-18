@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of gaussLegendreQuad</title>
+  <meta name="keywords" content="gaussLegendreQuad">
+  <meta name="description" content="gaussLegendreQuad - Return GaussLegendre points and weights.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">implicitFinal</a> &gt; gaussLegendreQuad.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\implicitFinal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>gaussLegendreQuad
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>gaussLegendreQuad - Return GaussLegendre points and weights.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [gaussPoints_col,gaussWeights_col] = gaussLegendreQuad(numGaussPoints) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> gaussLegendreQuad - Return GaussLegendre points and weights.
+
+ FILE: gaussLegendreQuad.m
+ DESCRIPTION:
+ Return Gauss-Legendre quadrature points and weights for a requested
+ number of Gauss points (supports common orders: 1,2,3,4,5,9,10,20).
+
+ Inputs:
+   numGaussPoints (variable): Number of Gauss points used per dimension
+ Outputs:
+   gaussPoints_col : Gauss-Legendre quadrature points on [-1,1].
+   gaussWeights_col : Gauss-Legendre quadrature weights.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="getGaussRelated.html" class="code" title="function [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesVals_vec,yNodesVals_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G)">getGaussRelated</a>	getGaussRelated - Return Gauss Related.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% gaussLegendreQuad - Return GaussLegendre points and weights.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% FILE: gaussLegendreQuad.m</span>
+0004 <span class="comment">% DESCRIPTION:</span>
+0005 <span class="comment">% Return Gauss-Legendre quadrature points and weights for a requested</span>
+0006 <span class="comment">% number of Gauss points (supports common orders: 1,2,3,4,5,9,10,20).</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Inputs:</span>
+0009 <span class="comment">%   numGaussPoints (variable): Number of Gauss points used per dimension</span>
+0010 <span class="comment">% Outputs:</span>
+0011 <span class="comment">%   gaussPoints_col : Gauss-Legendre quadrature points on [-1,1].</span>
+0012 <span class="comment">%   gaussWeights_col : Gauss-Legendre quadrature weights.</span>
+0013 <a name="_sub0" href="#_subfunctions" class="code">function [gaussPoints_col,gaussWeights_col] = gaussLegendreQuad(numGaussPoints)</a>
+0014     
+0015     <span class="keyword">if</span> numGaussPoints == 1
+0016     
+0017         gaussPoints_col  = 0;
+0018         gaussWeights_col = 2;
+0019     
+0020     <span class="keyword">elseif</span> numGaussPoints == 2
+0021     
+0022         gaussPoints_col  = [1/sqrt(3);-1/sqrt(3)];
+0023         gaussWeights_col = [1;1];
+0024     
+0025     <span class="keyword">elseif</span> numGaussPoints == 3
+0026     
+0027         gaussPoints_col  = [0;sqrt(3/5);-sqrt(3/5)];
+0028         gaussWeights_col = [8/9;5/9;5/9];
+0029     
+0030     <span class="keyword">elseif</span> numGaussPoints == 4
+0031     
+0032         gaussPoints_col  = [sqrt(3/7 - 2/7 * sqrt(6/5));-sqrt(3/7 - 2/7 * sqrt(6/5));sqrt(3/7 + 2/7 * sqrt(6/5));-sqrt(3/7 + 2/7 * sqrt(6/5))];
+0033         gaussWeights_col = [(18+sqrt(30))/36;(18+sqrt(30))/36;(18-sqrt(30))/36;(18-sqrt(30))/36];
+0034     
+0035     <span class="keyword">elseif</span> numGaussPoints == 5
+0036     
+0037         gaussPoints_col  = [0;1/3 * sqrt(5 - 2 * sqrt(10/7));-1/3 * sqrt(5 - 2 * sqrt(10/7));1/8 * sqrt(5 + 2 * sqrt(10/7));-1/8 * sqrt(5 + 2 * sqrt(10/7))];
+0038         gaussWeights_col = [128/225; (322 + 13*sqrt(70))/900;(322 + 13*sqrt(70))/900;(322 - 13*sqrt(70))/900;(322 - 13*sqrt(70))/900];
+0039     <span class="keyword">elseif</span> numGaussPoints == 9
+0040     
+0041         gaussPoints_col = [ <span class="keyword">...</span>
+0042             -0.968160239507626;
+0043             -0.836031107326636;
+0044             -0.613371432700590;
+0045             -0.324253423403809;
+0046             0;
+0047             0.324253423403809;
+0048             0.613371432700590;
+0049             0.836031107326636;
+0050             0.968160239507626 ];
+0051     
+0052         gaussWeights_col = [ <span class="keyword">...</span>
+0053             0.081274388361574;
+0054             0.180648160694857;
+0055             0.260610696402935;
+0056             0.312347077040003;
+0057             0.330239355001260;
+0058             0.312347077040003;
+0059             0.260610696402935;
+0060             0.180648160694857;
+0061             0.081274388361574 ];
+0062     <span class="keyword">elseif</span> numGaussPoints == 10
+0063     
+0064         gaussPoints_col = [
+0065             -0.973906528517172;
+0066             -0.865063366688985;
+0067             -0.679409568299024;
+0068             -0.433395394129247;
+0069             -0.148874338981631;
+0070             0.148874338981631;
+0071             0.433395394129247;
+0072             0.679409568299024;
+0073             0.865063366688985;
+0074             0.973906528517172 ];
+0075     
+0076         gaussWeights_col = [
+0077             0.066671344308688;
+0078             0.149451349150581;
+0079             0.219086362515982;
+0080             0.269266719309996;
+0081             0.295524224714753;
+0082             0.295524224714753;
+0083             0.269266719309996;
+0084             0.219086362515982;
+0085             0.149451349150581;
+0086             0.066671344308688 ];
+0087             <span class="keyword">elseif</span> numGaussPoints == 20
+0088     
+0089         gaussPoints_col = [
+0090             -0.9931285991850949;
+0091             -0.9639719272779138;
+0092             -0.9122344282513260;
+0093             -0.8391169718222188;
+0094             -0.7463319064601508;
+0095             -0.6360536807265150;
+0096             -0.5108670019508271;
+0097             -0.3737060887154196;
+0098             -0.2277858511416451;
+0099             -0.07652652113349733;
+0100              0.07652652113349733;
+0101              0.2277858511416451;
+0102              0.3737060887154196;
+0103              0.5108670019508271;
+0104              0.6360536807265150;
+0105              0.7463319064601508;
+0106              0.8391169718222188;
+0107              0.9122344282513260;
+0108              0.9639719272779138;
+0109              0.9931285991850949 ];
+0110     
+0111         gaussWeights_col = [
+0112             0.01761400713915212;
+0113             0.04060142980038694;
+0114             0.06267204833410906;
+0115             0.08327674157670475;
+0116             0.1019301198172404;
+0117             0.1181945319615184;
+0118             0.1316886384491766;
+0119             0.1420961093183821;
+0120             0.1491729864726037;
+0121             0.1527533871307258;
+0122             0.1527533871307258;
+0123             0.1491729864726037;
+0124             0.1420961093183821;
+0125             0.1316886384491766;
+0126             0.1181945319615184;
+0127             0.1019301198172404;
+0128             0.08327674157670475;
+0129             0.06267204833410906;
+0130             0.04060142980038694;
+0131             0.01761400713915212 ];
+0132     <span class="keyword">end</span>
+0133 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

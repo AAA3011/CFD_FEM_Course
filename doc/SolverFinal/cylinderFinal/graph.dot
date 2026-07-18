@@ -1,0 +1,33 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  getGaussRelated -> Jacobian;
+  getGaussRelated -> gaussLegendreQuad;
+  getGaussRelated -> shapeFunctions;
+  main -> compForces;
+  main -> computeLocalNS;
+  main -> computeLocalNSP;
+  main -> computePressure;
+  main -> getGaussRelated;
+  main -> makeVTKdir;
+  main -> readGeoAndBC;
+  main -> writeFinalVTK;
+  main -> writeVTKatInterval;
+  writeFinalVTK -> newVTK;
+  writeVTKatInterval -> newVTK;
+
+  Jacobian [URL="Jacobian.html"];
+  compForces [URL="compForces.html"];
+  computeLocalNS [URL="computeLocalNS.html"];
+  computeLocalNSP [URL="computeLocalNSP.html"];
+  computePressure [URL="computePressure.html"];
+  gaussLegendreQuad [URL="gaussLegendreQuad.html"];
+  getElementRelated [URL="getElementRelated.html"];
+  getGaussRelated [URL="getGaussRelated.html"];
+  main [URL="main.html"];
+  makeVTKdir [URL="makeVTKdir.html"];
+  newVTK [URL="newVTK.html"];
+  readGeoAndBC [URL="readGeoAndBC.html"];
+  shapeFunctions [URL="shapeFunctions.html"];
+  writeFinalVTK [URL="writeFinalVTK.html"];
+  writeVTKatInterval [URL="writeVTKatInterval.html"];
+}

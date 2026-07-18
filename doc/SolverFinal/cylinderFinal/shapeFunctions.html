@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of shapeFunctions</title>
+  <meta name="keywords" content="shapeFunctions">
+  <meta name="description" content="shapeFunctions - Evaluate shape functions and natural derivatives.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">cylinderFinal</a> &gt; shapeFunctions.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\cylinderFinal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>shapeFunctions
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>shapeFunctions - Evaluate shape functions and natural derivatives.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [N_row_points_pages,N_diff_rows_points_pages]=shapeFunctions(n_ElementType,coords_row_pages) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> shapeFunctions - Evaluate shape functions and natural derivatives.
+
+ FILE: shapeFunctions.m
+ DESCRIPTION:
+ Computes shape functions N and derivatives (∂N/∂ξ, ∂N/∂η) in natural
+ coordinates for various element types (Truss, QUAD4/8/9, triangles, hex).
+ All Gauss points vectorized using page-wise operations.
+
+ Inputs:
+   n_ElementType (variable): Number of nodes in one element direction for the current element type.
+   coords_row_pages (variable):Gauss point natural coordinates arranged page-wise.
+ Outputs:
+   N_row_points_pages : Shape function values evaluated at Gauss points, stored page-wise.
+   N_diff_rows_points_pages : Natural derivatives of shape functions at Gauss points.
+ Created in Jan 2021 by CUFE AER-2021 Seniors:
+ Mahmoud Ahmed Moustafa, Mohamed Ahmed Ali, Ahmed Elrawy &amp; Osama Mamdouh
+ For our Graduation Project, under the instruction and supervision of Dr. Ahmed Rashed</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="getGaussRelated.html" class="code" title="function [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesVals_vec,yNodesVals_vec,n_ElementType,numGaussPoints)">getGaussRelated</a>	getGaussRelated - Return Gauss Related.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% shapeFunctions - Evaluate shape functions and natural derivatives.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% FILE: shapeFunctions.m</span>
+0004 <span class="comment">% DESCRIPTION:</span>
+0005 <span class="comment">% Computes shape functions N and derivatives (∂N/∂ξ, ∂N/∂η) in natural</span>
+0006 <span class="comment">% coordinates for various element types (Truss, QUAD4/8/9, triangles, hex).</span>
+0007 <span class="comment">% All Gauss points vectorized using page-wise operations.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Inputs:</span>
+0010 <span class="comment">%   n_ElementType (variable): Number of nodes in one element direction for the current element type.</span>
+0011 <span class="comment">%   coords_row_pages (variable):Gauss point natural coordinates arranged page-wise.</span>
+0012 <span class="comment">% Outputs:</span>
+0013 <span class="comment">%   N_row_points_pages : Shape function values evaluated at Gauss points, stored page-wise.</span>
+0014 <span class="comment">%   N_diff_rows_points_pages : Natural derivatives of shape functions at Gauss points.</span>
+0015 <a name="_sub0" href="#_subfunctions" class="code">function [N_row_points_pages,N_diff_rows_points_pages]=shapeFunctions(n_ElementType,coords_row_pages)</a>
+0016 <span class="comment">% Created in Jan 2021 by CUFE AER-2021 Seniors:</span>
+0017 <span class="comment">% Mahmoud Ahmed Moustafa, Mohamed Ahmed Ali, Ahmed Elrawy &amp; Osama Mamdouh</span>
+0018 <span class="comment">% For our Graduation Project, under the instruction and supervision of Dr. Ahmed Rashed</span>
+0019 
+0020 N_points=size(coords_row_pages,3);
+0021 
+0022 xi_elev=coords_row_pages(1,1,:);
+0023 <span class="keyword">if</span> size(coords_row_pages,2)&gt;1
+0024     eta_elev=coords_row_pages(1,2,:);
+0025 <span class="keyword">end</span>
+0026 
+0027 <span class="keyword">if</span> size(coords_row_pages,2)&gt;2
+0028     zeta_elev=coords_row_pages(1,3,:);
+0029 <span class="keyword">end</span>
+0030 
+0031 <span class="keyword">switch</span> n_ElementType
+0032     <span class="keyword">case</span> 0   <span class="comment">%Truss</span>
+0033         N_row_points_pages=[1-xi_elev, 1+xi_elev]/2;
+0034         N_diff_rows_points_pages=repmat([-1, 1]/2,1,1,N_points);
+0035 
+0036     <span class="keyword">case</span> 1   <span class="comment">%Quad4</span>
+0037         N_row_points_pages=[(1+xi_elev).*(1-eta_elev) <span class="keyword">...</span>
+0038                             (1+xi_elev).*(1+eta_elev) <span class="keyword">...</span>
+0039                             (1-xi_elev).*(1+eta_elev) <span class="keyword">...</span>
+0040                             (1-xi_elev).*(1-eta_elev)]/4;
+0041 
+0042         N_diff_rows_points_pages=[  1-eta_elev, 1+eta_elev, -(1+eta_elev), -(1-eta_elev)
+0043                                   -(1+xi_elev),  1+xi_elev,     1-xi_elev,  -(1-xi_elev)]/4;
+0044 
+0045 
+0046     <span class="keyword">case</span> 2   <span class="comment">%Quad8</span>
+0047         N_row_points_pages=[-1/4*(1+xi_elev).*(1-eta_elev).*(1-xi_elev+eta_elev)  <span class="keyword">...</span>
+0048                              1/2*(1+xi_elev).*(1-eta_elev.*eta_elev) <span class="keyword">...</span>
+0049                             -1/4*(1+xi_elev).*(1+eta_elev).*(1-xi_elev-eta_elev) <span class="keyword">...</span>
+0050                              1/2*(1-xi_elev.*xi_elev).*(1+eta_elev) <span class="keyword">...</span>
+0051                             -1/4*(1-xi_elev).*(1+eta_elev).*(1+xi_elev-eta_elev) <span class="keyword">...</span>
+0052                              1/2*(1-xi_elev).*(1-eta_elev.*eta_elev) <span class="keyword">...</span>
+0053                             -1/4*(1-xi_elev).*(1-eta_elev).*(1+xi_elev+eta_elev) <span class="keyword">...</span>
+0054                              1/2*(1-xi_elev.*xi_elev).*(1-eta_elev)];
+0055 
+0056         N_diff_rows_points_pages=permute([ ((eta_elev-2.*xi_elev).*(eta_elev-1))/4,  ((xi_elev+1).*(2*eta_elev-xi_elev))/4
+0057                                            1/2-eta_elev.^2/2,            -eta_elev.*(xi_elev+1)
+0058                                           ((eta_elev+2*xi_elev).*(eta_elev+1))/4,  ((2*eta_elev+xi_elev).*(xi_elev+1))/4
+0059                                            -xi_elev.*(eta_elev+1),             1/2-xi_elev.^2/2
+0060                                            -((eta_elev-2*xi_elev).*(eta_elev+1))/4, -((xi_elev-1).*(2*eta_elev-xi_elev))/4
+0061                                             eta_elev.^2/2-1/2,             eta_elev.*(xi_elev-1)
+0062                                            -((eta_elev+2*xi_elev).*(eta_elev-1))/4, -((2*eta_elev+xi_elev).*(xi_elev-1))/4
+0063                                             xi_elev.*(eta_elev-1),             xi_elev.^2/2-1/2],[2,1,3]);
+0064         
+0065     <span class="keyword">case</span> 3   <span class="comment">%Quad9</span>
+0066         N_row_points_pages=permute([0.25*xi_elev.*(xi_elev+1).*eta_elev.*(eta_elev-1)
+0067                  -0.5*xi_elev.*(xi_elev+1).*(eta_elev.^2-1)
+0068                0.25*xi_elev.*(xi_elev+1).*eta_elev.*(eta_elev+1)
+0069                 -0.5*(xi_elev.^2-1).*eta_elev.*(eta_elev+1)
+0070                0.25*xi_elev.*(xi_elev-1).*eta_elev.*(eta_elev+1)
+0071                  -0.5*xi_elev.*(xi_elev-1).*(eta_elev.^2-1)
+0072                0.25*xi_elev.*(xi_elev-1).*eta_elev.*(eta_elev-1)
+0073                 -0.5*(xi_elev.^2-1).*eta_elev.*(eta_elev-1)
+0074                        (xi_elev.^2-1).*(eta_elev.^2-1)],[2,1,3]);
+0075                    
+0076          N_diff_rows_points_pages=[(eta_elev.*(2*xi_elev + 1).*(eta_elev - 1))/4, -((eta_elev.^2 - 1).*(2*xi_elev + 1))/2, (eta_elev.*(2*xi_elev + 1).*(eta_elev + 1))/4,           -eta_elev.*xi_elev.*(eta_elev + 1), (eta_elev.*(2*xi_elev - 1).*(eta_elev + 1))/4, -((eta_elev.^2 - 1).*(2*xi_elev - 1))/2, (eta_elev.*(2*xi_elev - 1).*(eta_elev - 1))/4,           -eta_elev.*xi_elev.*(eta_elev - 1), 2*xi_elev.*(eta_elev.^2 - 1)
+0077                                    (xi_elev.*(2*eta_elev - 1).*(xi_elev + 1))/4,            -eta_elev.*xi_elev.*(xi_elev + 1),  (xi_elev.*(2*eta_elev + 1).*(xi_elev + 1))/4, -((2*eta_elev + 1).*(xi_elev.^2 - 1))/2,  (xi_elev.*(2*eta_elev + 1).*(xi_elev - 1))/4,            -eta_elev.*xi_elev.*(xi_elev - 1),  (xi_elev.*(2*eta_elev - 1).*(xi_elev - 1))/4, -((2*eta_elev - 1).*(xi_elev.^2 - 1))/2, 2*eta_elev.*(xi_elev.^2 - 1)];
+0078         
+0079     <span class="keyword">case</span> 4   <span class="comment">%T3</span>
+0080         lamda_pages=1-xi_elev-eta_elev;
+0081         N_row_points_pages=[xi_elev   eta_elev   lamda_pages];
+0082         N_diff_rows_points_pages=repmat([1, 0, -1
+0083                                   0, 1, -1],1,1,N_points);
+0084     
+0085     <span class="keyword">case</span> 5   <span class="comment">%Tri6</span>
+0086         lamda_pages=1-xi_elev-eta_elev;
+0087         N_row_points_pages=[-xi_elev.*(1-2*xi_elev) <span class="keyword">...</span>
+0088                             4*xi_elev.*eta_elev <span class="keyword">...</span>
+0089                             -eta_elev.*(1-2*eta_elev) <span class="keyword">...</span><span class="comment">v</span>
+0090                             4*eta_elev.*lamda_pages <span class="keyword">...</span>
+0091                             -lamda_pages.*(1-2*lamda_pages) <span class="keyword">...</span>
+0092                             4*xi_elev.*lamda_pages];
+0093 
+0094         N_diff_rows_points_pages=[-1+4*xi_elev, 4*eta_elev,        zeros(1,1,N_points),        -4*eta_elev, 1-4*lamda_pages, 4*(lamda_pages-xi_elev)
+0095                                   zeros(1,1,N_points),  4*xi_elev, -1+4*eta_elev, 4*(lamda_pages-eta_elev), 1-4*lamda_pages,       -4*xi_elev];
+0096 
+0097     <span class="keyword">case</span> 11    <span class="comment">%Hex8</span>
+0098         N_row_points_pages=[(1-zeta_elev).*(1-eta_elev).*(1-xi_elev) <span class="keyword">...</span>
+0099                             (1+zeta_elev).*(1-eta_elev).*(1-xi_elev) <span class="keyword">...</span>
+0100                             (1+zeta_elev).*(1+eta_elev).*(1-xi_elev) <span class="keyword">...</span>
+0101                             (1-zeta_elev).*(1+eta_elev).*(1-xi_elev) <span class="keyword">...</span>
+0102                             (1-zeta_elev).*(1-eta_elev).*(1+xi_elev) <span class="keyword">...</span>
+0103                             (1+zeta_elev).*(1-eta_elev).*(1+xi_elev) <span class="keyword">...</span>
+0104                             (1+zeta_elev).*(1+eta_elev).*(1+xi_elev) <span class="keyword">...</span>
+0105                             (1-zeta_elev).*(1+eta_elev).*(1+xi_elev)]/8;
+0106         
+0107         N_diff_rows_points_pages=permute([  -(eta_elev - 1).*(zeta_elev - 1), -(xi_elev - 1).*(zeta_elev - 1), -(eta_elev - 1).*(xi_elev - 1)
+0108                                              (eta_elev + 1).*(zeta_elev - 1),  (xi_elev - 1).*(zeta_elev - 1),  (eta_elev + 1).*(xi_elev - 1)
+0109                                             -(eta_elev + 1).*(zeta_elev + 1), -(xi_elev - 1).*(zeta_elev + 1), -(eta_elev + 1).*(xi_elev - 1)
+0110                                              (eta_elev - 1).*(zeta_elev + 1),  (xi_elev - 1).*(zeta_elev + 1),  (eta_elev - 1).*(xi_elev - 1)
+0111                                              (eta_elev - 1).*(zeta_elev - 1),  (xi_elev + 1).*(zeta_elev - 1),  (eta_elev - 1).*(xi_elev + 1)
+0112                                             -(eta_elev + 1).*(zeta_elev - 1), -(xi_elev + 1).*(zeta_elev - 1), -(eta_elev + 1).*(xi_elev + 1)
+0113                                              (eta_elev + 1).*(zeta_elev + 1),  (xi_elev + 1).*(zeta_elev + 1),  (eta_elev + 1).*(xi_elev + 1)
+0114                                             -(eta_elev - 1).*(zeta_elev + 1), -(xi_elev + 1).*(zeta_elev + 1), -(eta_elev - 1).*(xi_elev + 1)]/8,[2,1,3]);
+0115 
+0116     <span class="keyword">case</span> 22   <span class="comment">%Hex20</span>
+0117         N_row_points_pages=[(xi_elev/8 - 1/8).*(eta_elev - 1).*(zeta_elev - 1).*(eta_elev + xi_elev + zeta_elev + 2) <span class="keyword">...</span>
+0118                            -(xi_elev/8 + 1/8).*(eta_elev - 1).*(zeta_elev - 1).*(eta_elev - xi_elev + zeta_elev + 2) <span class="keyword">...</span>
+0119                            -(xi_elev/8 + 1/8).*(eta_elev + 1).*(zeta_elev - 1).*(eta_elev + xi_elev - zeta_elev - 2) <span class="keyword">...</span>
+0120                            -(xi_elev/8 - 1/8).*(eta_elev + 1).*(zeta_elev - 1).*(xi_elev - eta_elev + zeta_elev + 2) <span class="keyword">...</span>
+0121                            -(xi_elev/8 - 1/8).*(eta_elev - 1).*(zeta_elev + 1).*(eta_elev + xi_elev - zeta_elev + 2) <span class="keyword">...</span>
+0122                             (xi_elev/8 + 1/8).*(eta_elev - 1).*(zeta_elev + 1).*(eta_elev - xi_elev - zeta_elev + 2) <span class="keyword">...</span>
+0123                             (xi_elev/8 + 1/8).*(eta_elev + 1).*(zeta_elev + 1).*(eta_elev + xi_elev + zeta_elev - 2) <span class="keyword">...</span>
+0124                            -(xi_elev/8 - 1/8).*(eta_elev + 1).*(zeta_elev + 1).*(eta_elev - xi_elev + zeta_elev - 2) <span class="keyword">...</span>
+0125                            -(xi_elev.^2/4 - 1/4).*(eta_elev - 1).*(zeta_elev - 1) <span class="keyword">...</span>
+0126                             (eta_elev.^2 - 1).*(xi_elev/4 + 1/4).*(zeta_elev - 1) <span class="keyword">...</span>
+0127                             (xi_elev.^2/4 - 1/4).*(eta_elev + 1).*(zeta_elev - 1) <span class="keyword">...</span>
+0128                            -(eta_elev.^2 - 1).*(xi_elev/4 - 1/4).*(zeta_elev - 1) <span class="keyword">...</span>
+0129                            -(xi_elev/4 - 1/4).*(zeta_elev.^2 - 1).*(eta_elev - 1) <span class="keyword">...</span>
+0130                             (xi_elev/4 + 1/4).*(zeta_elev.^2 - 1).*(eta_elev - 1) <span class="keyword">...</span>
+0131                            -(xi_elev/4 + 1/4).*(zeta_elev.^2 - 1).*(eta_elev + 1) <span class="keyword">...</span>
+0132                             (xi_elev/4 - 1/4).*(zeta_elev.^2 - 1).*(eta_elev + 1) <span class="keyword">...</span>
+0133                             (xi_elev.^2/4 - 1/4).*(eta_elev - 1).*(zeta_elev + 1) <span class="keyword">...</span>
+0134                            -(eta_elev.^2 - 1).*(xi_elev/4 + 1/4).*(zeta_elev + 1) <span class="keyword">...</span>
+0135                            -(xi_elev.^2/4 - 1/4).*(eta_elev + 1).*(zeta_elev + 1) <span class="keyword">...</span>
+0136                             (eta_elev.^2 - 1).*(xi_elev/4 - 1/4).*(zeta_elev + 1)];
+0137         
+0138         N_diff_rows_points_pages=permute([ ((eta_elev - 1).*(zeta_elev - 1).*(eta_elev + 2*xi_elev + zeta_elev + 1))/8,  ((xi_elev - 1).*(zeta_elev - 1).*(2*eta_elev + xi_elev + zeta_elev + 1))/8,  ((eta_elev - 1).*(xi_elev - 1).*(eta_elev + xi_elev + 2*zeta_elev + 1))/8
+0139                                  -((eta_elev - 1).*(zeta_elev - 1).*(eta_elev - 2*xi_elev + zeta_elev + 1))/8, -((xi_elev + 1).*(zeta_elev - 1).*(2*eta_elev - xi_elev + zeta_elev + 1))/8, -((eta_elev - 1).*(xi_elev + 1).*(eta_elev - xi_elev + 2*zeta_elev + 1))/8
+0140                                  -((eta_elev + 1).*(zeta_elev - 1).*(eta_elev + 2*xi_elev - zeta_elev - 1))/8, -((xi_elev + 1).*(zeta_elev - 1).*(2*eta_elev + xi_elev - zeta_elev - 1))/8, -((eta_elev + 1).*(xi_elev + 1).*(eta_elev + xi_elev - 2*zeta_elev - 1))/8
+0141                                  -((eta_elev + 1).*(zeta_elev - 1).*(2*xi_elev - eta_elev + zeta_elev + 1))/8, -((xi_elev - 1).*(zeta_elev - 1).*(xi_elev - 2*eta_elev + zeta_elev + 1))/8, -((eta_elev + 1).*(xi_elev - 1).*(xi_elev - eta_elev + 2*zeta_elev + 1))/8
+0142                                  -((eta_elev - 1).*(zeta_elev + 1).*(eta_elev + 2*xi_elev - zeta_elev + 1))/8, -((xi_elev - 1).*(zeta_elev + 1).*(2*eta_elev + xi_elev - zeta_elev + 1))/8, -((eta_elev - 1).*(xi_elev - 1).*(eta_elev + xi_elev - 2*zeta_elev + 1))/8
+0143                                   ((eta_elev - 1).*(zeta_elev + 1).*(eta_elev - 2*xi_elev - zeta_elev + 1))/8,  ((xi_elev + 1).*(zeta_elev + 1).*(2*eta_elev - xi_elev - zeta_elev + 1))/8,  ((eta_elev - 1).*(xi_elev + 1).*(eta_elev - xi_elev - 2*zeta_elev + 1))/8
+0144                                   ((eta_elev + 1).*(zeta_elev + 1).*(eta_elev + 2*xi_elev + zeta_elev - 1))/8,  ((xi_elev + 1).*(zeta_elev + 1).*(2*eta_elev + xi_elev + zeta_elev - 1))/8,  ((eta_elev + 1).*(xi_elev + 1).*(eta_elev + xi_elev + 2*zeta_elev - 1))/8
+0145                                  -((eta_elev + 1).*(zeta_elev + 1).*(eta_elev - 2*xi_elev + zeta_elev - 1))/8, -((xi_elev - 1).*(zeta_elev + 1).*(2*eta_elev - xi_elev + zeta_elev - 1))/8, -((eta_elev + 1).*(xi_elev - 1).*(eta_elev - xi_elev + 2*zeta_elev - 1))/8
+0146                                                       -(xi_elev.*(eta_elev - 1).*(zeta_elev - 1))/2,                       -(xi_elev.^2/4 - 1/4).*(zeta_elev - 1),                       -(xi_elev.^2/4 - 1/4).*(eta_elev - 1)
+0147                                                         ((eta_elev.^2 - 1).*(zeta_elev - 1))/4,                    2*eta_elev.*(xi_elev/4 + 1/4).*(zeta_elev - 1),                        (eta_elev.^2 - 1).*(xi_elev/4 + 1/4)
+0148                                                        (xi_elev.*(eta_elev + 1).*(zeta_elev - 1))/2,                        (xi_elev.^2/4 - 1/4).*(zeta_elev - 1),                        (xi_elev.^2/4 - 1/4).*(eta_elev + 1)
+0149                                                        -((eta_elev.^2 - 1).*(zeta_elev - 1))/4,                   -2*eta_elev.*(xi_elev/4 - 1/4).*(zeta_elev - 1),                       -(eta_elev.^2 - 1).*(xi_elev/4 - 1/4)
+0150                                                        -((zeta_elev.^2 - 1).*(eta_elev - 1))/4,                       -(xi_elev/4 - 1/4).*(zeta_elev.^2 - 1),                  -2*zeta_elev.*(xi_elev/4 - 1/4).*(eta_elev - 1)
+0151                                                         ((zeta_elev.^2 - 1).*(eta_elev - 1))/4,                        (xi_elev/4 + 1/4).*(zeta_elev.^2 - 1),                   2*zeta_elev.*(xi_elev/4 + 1/4).*(eta_elev - 1)
+0152                                                        -((zeta_elev.^2 - 1).*(eta_elev + 1))/4,                       -(xi_elev/4 + 1/4).*(zeta_elev.^2 - 1),                  -2*zeta_elev.*(xi_elev/4 + 1/4).*(eta_elev + 1)
+0153                                                         ((zeta_elev.^2 - 1).*(eta_elev + 1))/4,                        (xi_elev/4 - 1/4).*(zeta_elev.^2 - 1),                   2*zeta_elev.*(xi_elev/4 - 1/4).*(eta_elev + 1)
+0154                                                        (xi_elev.*(eta_elev - 1).*(zeta_elev + 1))/2,                        (xi_elev.^2/4 - 1/4).*(zeta_elev + 1),                        (xi_elev.^2/4 - 1/4).*(eta_elev - 1)
+0155                                                        -((eta_elev.^2 - 1).*(zeta_elev + 1))/4,                   -2*eta_elev.*(xi_elev/4 + 1/4).*(zeta_elev + 1),                       -(eta_elev.^2 - 1).*(xi_elev/4 + 1/4)
+0156                                                       -(xi_elev.*(eta_elev + 1).*(zeta_elev + 1))/2,                       -(xi_elev.^2/4 - 1/4).*(zeta_elev + 1),                       -(xi_elev.^2/4 - 1/4).*(eta_elev + 1)
+0157                                                         ((eta_elev.^2 - 1).*(zeta_elev + 1))/4,                    2*eta_elev.*(xi_elev/4 - 1/4).*(zeta_elev + 1),                        (eta_elev.^2 - 1).*(xi_elev/4 - 1/4)],[2,1,3]);
+0158         
+0159     <span class="keyword">case</span> 33   <span class="comment">%Tet4</span>
+0160        N_row_points_pages=[1-xi_elev-eta_elev-zeta_elev   xi_elev   eta_elev   zeta_elev];
+0161        N_diff_rows_points_pages=repmat([-1 1 0 0
+0162                                         -1 0 1 0
+0163                                         -1 0 0 1],1,1,N_points);
+0164 <span class="comment">%        N_row_points_pages=circshift(N_row_points_pages,-1,2);</span>
+0165 <span class="comment">%        N_diff_rows_points_pages=circshift(N_diff_rows_points_pages,-1,2);</span>
+0166     
+0167     <span class="keyword">case</span> 44   <span class="comment">%Tet10</span>
+0168         N_row_points_pages=[-(1-xi_elev-eta_elev-zeta_elev).*(1-2*(1-xi_elev-eta_elev-zeta_elev)) <span class="keyword">...</span>
+0169                             -xi_elev.*(1-2*xi_elev) <span class="keyword">...</span>
+0170                             -eta_elev.*(1-2*eta_elev) <span class="keyword">...</span>
+0171                             -zeta_elev.*(1-2*zeta_elev) <span class="keyword">...</span>
+0172                             4*xi_elev.*(1-xi_elev-eta_elev-zeta_elev) <span class="keyword">...</span>
+0173                             4*xi_elev.*eta_elev <span class="keyword">...</span>
+0174                             4*eta_elev.*(1-xi_elev-eta_elev-zeta_elev) <span class="keyword">...</span>
+0175                             4*zeta_elev.*(1-xi_elev-eta_elev-zeta_elev) <span class="keyword">...</span>
+0176                             4*xi_elev.*zeta_elev <span class="keyword">...</span>
+0177                             4*eta_elev.*zeta_elev];
+0178         
+0179         N_diff_rows_points_pages=permute([4*eta_elev + 4*xi_elev+4*zeta_elev-3, 4*eta_elev+4*xi_elev+4*zeta_elev-3, 4*eta_elev+4*xi_elev+4*zeta_elev-3
+0180                                                 4*xi_elev-1,                   zeros(1,1,N_points),                   zeros(1,1,N_points)
+0181                                                      zeros(1,1,N_points),             4*eta_elev-1,                   zeros(1,1,N_points)
+0182                                                      zeros(1,1,N_points),                   zeros(1,1,N_points),            4*zeta_elev-1
+0183                                    4-8*xi_elev-4*zeta_elev-4*eta_elev,               -4*xi_elev,               -4*xi_elev
+0184                                                  4*eta_elev,                4*xi_elev,                   zeros(1,1,N_points)
+0185                                                 -4*eta_elev, 4-4*xi_elev-4*zeta_elev-8*eta_elev,              -4*eta_elev
+0186                                                -4*zeta_elev,             -4*zeta_elev, 4-4*xi_elev-8*zeta_elev-4*eta_elev
+0187                                                 4*zeta_elev,                   zeros(1,1,N_points),                4*xi_elev
+0188                                                      zeros(1,1,N_points),              4*zeta_elev,               4*eta_elev],[2,1,3]);
+0189         
+0190 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

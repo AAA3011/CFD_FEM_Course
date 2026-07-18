@@ -1,0 +1,292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of mainLaplace</title>
+  <meta name="keywords" content="mainLaplace">
+  <meta name="description" content="mainLaplace - Main simulation driver.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../../index.html">Home</a> &gt;  <a href="#">SolverFinal</a> &gt; <a href="index.html">laplaceFinal</a> &gt; mainLaplace.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../../index.html"><img alt="<" border="0" src="../../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for SolverFinal\laplaceFinal&nbsp;<img alt=">" border="0" src="../../right.png"></a></td></tr></table>-->
+
+<h1>mainLaplace
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>mainLaplace - Main simulation driver.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> mainLaplace - Main simulation driver.
+
+ FILE: mainLaplace.m
+ DESCRIPTION:
+ Driver script that sets up a structured mesh, constructs high-order
+ quadrilateral elements, precomputes element data, assembles the global
+ stiffness matrix for a Laplace problem, applies boundary conditions,
+ solves the linear system, computes error norms, and plots results.
+
+ INPUTS (script parameters inside file):
+ numGaussPoints, order, order_G, numElementsX, numElementsY, lengthX/Y
+
+ OUTPUTS:
+ Figures saved to ./figures and computed variables in workspace
+
+ Syntax: mainLaplace()
+
+ Inputs: none
+
+ Outputs: none</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="calcLocal.html" class="code" title="function pk_mat = calcLocal(elementData)">calcLocal</a>	calcLocal - Calc Local.</li><li><a href="calcNorms.html" class="code" title="function [L2_norm,H1_norm] = calcNorms(uSolution_cvec,totNumElements,elementData)">calcNorms</a>	calcNorms - Calc Norms.</li><li><a href="getGaussRelated.html" class="code" title="function [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesVals_vec,yNodesVals_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G)">getGaussRelated</a>	getGaussRelated - Return Gauss Related.</li><li><a href="quad4_to_quadHigh.html" class="code" title="function [quadN_conn, xCoordN, yCoordN] = quad4_to_quadHigh(quad4_conn, xCoord, yCoord, order)">quad4_to_quadHigh</a>	quad4_to_quadHigh - Convert Quad4 mesh to higher-order quadrilateral mesh.</li><li><a href="structuredMesh.html" class="code" title="function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin)">structuredMesh</a>	structuredMesh - Create structured quadrilateral mesh.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% mainLaplace - Main simulation driver.</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">% FILE: mainLaplace.m</span>
+0004 <span class="comment">% DESCRIPTION:</span>
+0005 <span class="comment">% Driver script that sets up a structured mesh, constructs high-order</span>
+0006 <span class="comment">% quadrilateral elements, precomputes element data, assembles the global</span>
+0007 <span class="comment">% stiffness matrix for a Laplace problem, applies boundary conditions,</span>
+0008 <span class="comment">% solves the linear system, computes error norms, and plots results.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% INPUTS (script parameters inside file):</span>
+0011 <span class="comment">% numGaussPoints, order, order_G, numElementsX, numElementsY, lengthX/Y</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% OUTPUTS:</span>
+0014 <span class="comment">% Figures saved to ./figures and computed variables in workspace</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Syntax: mainLaplace()</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Inputs: none</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Outputs: none</span>
+0021 <span class="comment">%</span>
+0022 
+0023 clc;clearvars;close all;
+0024 
+0025 <span class="comment">%% Element informations</span>
+0026 numGaussPoints         = 10;
+0027 numGeometryGaussPoints = numGaussPoints;
+0028 
+0029 order   = 5;
+0030 K       = (order+1)^2;
+0031 
+0032 order_G = 1;
+0033 K_G     = (order_G+1)^2;
+0034 
+0035 <span class="comment">%% Connectivity Matrix and Grid Generation</span>
+0036 numElementsX = 14;
+0037 numElementsY = 14;
+0038 numNodesX    = numElementsX + 1;
+0039 numNodesY    = numElementsY + 1;
+0040 
+0041 lengthX      = 1;
+0042 lengthY      = 1;
+0043 xMin         = 0;
+0044 yMin         = 0;
+0045 
+0046 [connectivityMatrixGeo_mat,xCoordGeo_vec,yCoordGeo_vec] = <a href="structuredMesh.html" class="code" title="function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin)">structuredMesh</a>(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin);
+0047 
+0048 <span class="comment">%% Converting to higher order mesh</span>
+0049 [quad_high_conn, xCoord_high, yCoord_high] = <a href="quad4_to_quadHigh.html" class="code" title="function [quadN_conn, xCoordN, yCoordN] = quad4_to_quadHigh(quad4_conn, xCoord, yCoord, order)">quad4_to_quadHigh</a>(connectivityMatrixGeo_mat, xCoordGeo_vec, yCoordGeo_vec, order);
+0050 connectivityMatrix_mat = quad_high_conn;
+0051 xCoord_vec = xCoord_high;
+0052 yCoord_vec = yCoord_high;
+0053 
+0054 <span class="keyword">if</span> order_G &gt; 1
+0055     [quad_high_conn, xCoord_high, yCoord_high] = <a href="quad4_to_quadHigh.html" class="code" title="function [quadN_conn, xCoordN, yCoordN] = quad4_to_quadHigh(quad4_conn, xCoord, yCoord, order)">quad4_to_quadHigh</a>(connectivityMatrixGeo_mat, xCoordGeo_vec, yCoordGeo_vec, order);
+0056     connectivityMatrixGeo_mat = quad_high_conn;
+0057     xCoordGeo_vec = xCoord_high;
+0058     yCoordGeo_vec = yCoord_high;
+0059 <span class="keyword">end</span>
+0060 
+0061 <span class="comment">%% Precompute geometric data for all elements</span>
+0062 numElements = numElementsX * numElementsY;
+0063 elementData = cell(numElements, 1);
+0064 
+0065 <span class="keyword">for</span> eleNum = 1:numElements
+0066     elementData{eleNum}.GNodes             = connectivityMatrixGeo_mat(eleNum,:);
+0067     elementData{eleNum}.xNodesValsGeo_vec  = xCoordGeo_vec(elementData{eleNum}.GNodes);
+0068     elementData{eleNum}.yNodesValsGeo_vec  = yCoordGeo_vec(elementData{eleNum}.GNodes);
+0069 
+0070     elementData{eleNum}.Nodes           = connectivityMatrix_mat(eleNum,:);
+0071     elementData{eleNum}.xNodesVals_vec  = xCoord_vec(elementData{eleNum}.Nodes);
+0072     elementData{eleNum}.yNodesVals_vec  = yCoord_vec(elementData{eleNum}.Nodes);
+0073 
+0074     [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = <a href="getGaussRelated.html" class="code" title="function [weights_pages,N_row_points_pages,J_det_points_elev,N_diff_PhysCoords_points_rows_pages,ElementPhysCoords_mat] = getGaussRelated(xNodesVals_vec,yNodesVals_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G)">getGaussRelated</a>(elementData{eleNum}.xNodesValsGeo_vec,elementData{eleNum}.yNodesValsGeo_vec,K,numGaussPoints,K_G,numGeometryGaussPoints,order,order_G);
+0075 
+0076 
+0077     elementData{eleNum}.weights    = weights_pages;
+0078     elementData{eleNum}.N_row      = N_row_points_pages;
+0079     elementData{eleNum}.J_det      = J_det_points_elev;
+0080     elementData{eleNum}.dNdX       = N_diff_PhysCoords_points_rows_pages(1, :, :);
+0081     elementData{eleNum}.dNdY       = N_diff_PhysCoords_points_rows_pages(2, :, :);
+0082     elementData{eleNum}.physCoords = ElementPhysCoords_mat;
+0083 <span class="keyword">end</span>
+0084 
+0085 <span class="comment">%% local, Global Matrices</span>
+0086 totNumNodes      = length(xCoord_vec);
+0087 totNumElements   = size(connectivityMatrix_mat,1);
+0088 globalMatrix_mat = zeros(totNumNodes);
+0089 
+0090 <span class="keyword">for</span> eleNum = 1:totNumElements
+0091 
+0092     elementNodes_vec = elementData{eleNum}.Nodes;
+0093 
+0094     elementNodesGeo_vec = elementData{eleNum}.GNodes;
+0095     xNodesValsGeo_vec   = elementData{eleNum}.xNodesValsGeo_vec;
+0096     yNodesValsGeo_vec   = elementData{eleNum}.yNodesValsGeo_vec;
+0097 
+0098     localMatrix_mat = <a href="calcLocal.html" class="code" title="function pk_mat = calcLocal(elementData)">calcLocal</a>(elementData{eleNum});
+0099 
+0100     globalMatrix_mat(elementNodes_vec,elementNodes_vec) = globalMatrix_mat(elementNodes_vec,elementNodes_vec) + localMatrix_mat;
+0101 
+0102 <span class="keyword">end</span>
+0103 
+0104 <span class="comment">%% Boundary Conditions Locations</span>
+0105 ind_vec    = 1:totNumNodes;
+0106 upperWall  = ind_vec(yCoord_vec == 1);
+0107 bottomWall = ind_vec(yCoord_vec == 0);
+0108 rightWall  = ind_vec(xCoord_vec == 1);
+0109 leftWall   = ind_vec(xCoord_vec == 0);
+0110 
+0111 <span class="comment">%% Forcing Boundary Conditions</span>
+0112 uRHS_cvec = zeros(totNumNodes,1);
+0113 uRHS_cvec(bottomWall) = sin(pi * xCoord_vec(bottomWall));
+0114 
+0115 globalMatrix_mat(bottomWall,:)          = 0;
+0116 globalMatrix_mat(bottomWall,bottomWall) = eye(length(bottomWall));
+0117 globalMatrix_mat(upperWall,:)           = 0;
+0118 globalMatrix_mat(upperWall,upperWall)   = eye(length(upperWall));
+0119 globalMatrix_mat(rightWall,:)           = 0;
+0120 globalMatrix_mat(rightWall,rightWall)   = eye(length(rightWall));
+0121 globalMatrix_mat(leftWall,:)            = 0;
+0122 globalMatrix_mat(leftWall,leftWall)     = eye(length(leftWall));
+0123 
+0124 <span class="comment">%% FDM Solution</span>
+0125 uSolution_cvec = globalMatrix_mat \ uRHS_cvec;
+0126 
+0127 <span class="comment">%% Exact Solution</span>
+0128 uExact_cvec  = (cosh(pi*yCoord_vec) - coth(pi)*sinh(pi*yCoord_vec)).* sin(pi*xCoord_vec);
+0129 uxExact_cvec = pi .* ( cosh(pi*yCoord_vec) - coth(pi).*sinh(pi*yCoord_vec) ) .* cos(pi*xCoord_vec);
+0130 uyExact_cvec = pi*( sinh(pi*yCoord_vec) - coth(pi)*cosh(pi*yCoord_vec) ).* sin(pi*xCoord_vec);
+0131 
+0132 <span class="comment">%% Errors Calculations</span>
+0133 [L2_norm,H1_norm] =  <a href="calcNorms.html" class="code" title="function [L2_norm,H1_norm] = calcNorms(uSolution_cvec,totNumElements,elementData)">calcNorms</a>(uSolution_cvec,totNumElements,elementData);
+0134 
+0135 <span class="comment">%% Plotting Code</span>
+0136 fsLabel = 14;
+0137 fsTitle = 16;
+0138 fsLegend = 12;
+0139 fsAxes = 12;
+0140 
+0141 outDir = fullfile(pwd, <span class="string">'figures'</span>);
+0142 <span class="keyword">if</span> ~exist(outDir, <span class="string">'dir'</span>)
+0143     [ok, msg] = mkdir(outDir);
+0144     <span class="keyword">if</span> ~ok
+0145         error(<span class="string">'Failed to create folder %s: %s'</span>, outDir, msg);
+0146     <span class="keyword">end</span>
+0147 <span class="keyword">end</span>
+0148 
+0149 <span class="comment">% Solution Plotting: FEM vs Exact, side by side</span>
+0150 tri = delaunay(xCoord_vec, yCoord_vec);
+0151 figFEMExact = figure(<span class="string">'Position'</span>,[100 100 1200 500]);
+0152 
+0153 subplot(1,2,1)
+0154 trisurf(tri, xCoord_vec, yCoord_vec, uSolution_cvec)
+0155 shading interp
+0156 view(2)
+0157 colorbar
+0158 axis equal tight
+0159 title([<span class="string">'FEM solution using '</span>, num2str(totNumElements),<span class="string">' elements Q'</span>, num2str(K_G),<span class="string">' geometry Q'</span>, num2str(K), <span class="string">' solution'</span>], <span class="keyword">...</span>
+0160     <span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsTitle)
+0161 set(gca,<span class="string">'FontSize'</span>,fsAxes)
+0162 
+0163 subplot(1,2,2)
+0164 trisurf(tri, xCoord_vec, yCoord_vec, uExact_cvec)
+0165 view(2); shading interp; colorbar
+0166 axis equal tight
+0167 title(<span class="string">'Exact solution'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsTitle)
+0168 set(gca,<span class="string">'FontSize'</span>,fsAxes)
+0169 
+0170 print(figFEMExact, fullfile(outDir,<span class="string">'FEM_vs_Exact_solution'</span>), <span class="string">'-dsvg'</span>)
+0171 
+0172 <span class="comment">% Solution plotting 3D</span>
+0173 fig3D = figure;
+0174 trisurf(delaunay(xCoord_vec,yCoord_vec),xCoord_vec, yCoord_vec, uSolution_cvec)
+0175 shading interp
+0176 colorbar
+0177 axis tight
+0178 xlabel(<span class="string">'x'</span>,<span class="string">'FontSize'</span>,fsLabel); ylabel(<span class="string">'y'</span>,<span class="string">'FontSize'</span>,fsLabel); zlabel(<span class="string">'u'</span>,<span class="string">'FontSize'</span>,fsLabel)
+0179 title(<span class="string">'FEM solution'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsTitle)
+0180 set(gca,<span class="string">'FontSize'</span>,fsAxes)
+0181 print(fig3D, fullfile(outDir,<span class="string">'FEM_solution_3D'</span>), <span class="string">'-dsvg'</span>)
+0182 
+0183 <span class="comment">% Mesh Plotting</span>
+0184 figMesh = figure(<span class="string">'Position'</span>,[100 100 1400 700]*0.85);
+0185 subplot(1,2,1)
+0186 plotQuadHigherMesh(connectivityMatrixGeo_mat, xCoordGeo_vec, yCoordGeo_vec)
+0187 axis equal;
+0188 xlabel(<span class="string">'x/d'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsLabel);
+0189 ylabel(<span class="string">'y/d'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsLabel);
+0190 title([<span class="string">'Geometry mesh Q'</span>, num2str(K_G)],<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsTitle);
+0191 grid on;
+0192 set(gca,<span class="string">'FontSize'</span>,fsAxes)
+0193 
+0194 subplot(1,2,2)
+0195 plotQuadHigherMesh(quad_high_conn, xCoord_high, yCoord_high)
+0196 axis equal;
+0197 xlabel(<span class="string">'x/d'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsLabel);
+0198 ylabel(<span class="string">'y/d'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsLabel);
+0199 title([<span class="string">'Solution mesh Q'</span>, num2str(K)],<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsTitle);
+0200 grid on;
+0201 set(gca,<span class="string">'FontSize'</span>,fsAxes)
+0202 <span class="comment">% print(figMesh, fullfile(outDir,'mesh_plot'), '-dsvg')</span>
+0203 print(figMesh, fullfile(outDir,<span class="string">'mesh_plot'</span>), <span class="string">'-dpng'</span>, <span class="string">'-r300'</span>)
+0204 
+0205 <span class="comment">% Solution along x = 0.5</span>
+0206 figLine = figure;
+0207 xTarget = 0.5;
+0208 tolLine = 1e-10;
+0209 lineIdx = find(abs(xCoord_vec - xTarget) &lt; tolLine);
+0210 <span class="keyword">if</span> isempty(lineIdx)
+0211     warning(<span class="string">'No nodes found near x = 0.5. Increase tolLine or check mesh.'</span>);
+0212 <span class="keyword">else</span>
+0213     [yLine, sortIdx] = sort(yCoord_vec(lineIdx));
+0214     uSolLine = uSolution_cvec(lineIdx(sortIdx));
+0215     uExLine = uExact_cvec(lineIdx(sortIdx));
+0216     plot(yLine, uSolLine, <span class="string">'LineWidth'</span>, 2, <span class="string">'DisplayName'</span>, <span class="string">'$$u_{sol}$$'</span>);
+0217     hold on;
+0218     plot(yLine, uExLine,<span class="string">'o'</span>, <span class="string">'LineWidth'</span>, 1.2, <span class="string">'DisplayName'</span>, <span class="string">'$$u_{exact}$$'</span>);
+0219     xlabel(<span class="string">'y'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsLabel);
+0220     ylabel(<span class="string">'u(x=0.5,y)'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsLabel);
+0221     title(<span class="string">'u values along x = 0.5'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsTitle);
+0222     legend(<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'FontSize'</span>,fsLegend);
+0223     grid on;
+0224     set(gca,<span class="string">'FontSize'</span>,fsAxes)
+0225     print(figLine, fullfile(outDir,<span class="string">'solution_along_x_0p5'</span>), <span class="string">'-dsvg'</span>)
+0226 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 03-Jul-2026 19:21:02 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
