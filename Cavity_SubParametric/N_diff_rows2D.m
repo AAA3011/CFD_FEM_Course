@@ -1,3 +1,13 @@
+% N_diff_rows2D - Compute derivatives of Lagrange shape functions.
+%
+% Description: Compute 2D shape function derivatives (dN/dx, dN/dy) at Gauss points
+% Inputs:
+%   K (variable): Number of nodes per element side for the solution element (K = order+1).
+%   ind_i (variable): Row index array for tensor-product Lagrange shape functions.
+%   ind_j (variable): Column index array for tensor-product Lagrange shape functions.
+%   naturalCoords_row_pages (variable): Vector of physical coordinates.
+% Outputs:
+%   none
 function N_diff_rows_pages=N_diff_rows2D(K,ind_i,ind_j,naturalCoords_row_pages)
     xi_elev=naturalCoords_row_pages(1,1,:);
     eta_elev=naturalCoords_row_pages(1,2,:);

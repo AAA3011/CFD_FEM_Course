@@ -1,3 +1,11 @@
+% N_diff_rows - Compute derivatives of Lagrange shape functions.
+%
+% Description: Compute derivatives of 1D Lagrange shape functions at points.
+% Inputs:
+%   K (variable): Number of nodes per element side for the solution element (K = order+1).
+%   xi_elev (variable): Natural coordinate evaluation points along the xi direction.
+% Outputs:
+%   none
 function N_diff_row_pages=N_diff_rows(K,xi_elev)
     N_points=size(xi_elev,3); % number of points at which shape functions are to be computed
     xi_i_row=linspace(-1,1,K);

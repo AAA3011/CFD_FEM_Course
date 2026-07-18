@@ -1,3 +1,11 @@
+% N_row - Compute 1D/2D Lagrange shape function values.
+%
+% Description: Evaluate 1D Lagrange shape functions at provided natural coords.
+% Inputs:
+%   K (variable): Number of nodes per element side for the solution element (K = order+1).
+%   xi_elev (variable): Natural coordinate evaluation points along the xi direction.
+% Outputs:
+%   none
 function N_row_pages=N_row(K,xi_elev)
     xi_i_row=linspace(-1,1,K);
     xi_i_row=xi_i_row([1,K,2:K-1]); % reordering nodes, because node 2 is always at the end

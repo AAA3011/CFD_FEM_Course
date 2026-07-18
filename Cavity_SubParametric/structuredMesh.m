@@ -1,6 +1,21 @@
-function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElementsX,numElementsY,lengthX,lengthY,xMin,yMin)
+% structuredMesh - Create structured quadrilateral mesh.
+%
+% Description: Create a structured Q4 mesh connectivity and nodal coordinates
+% Inputs:
+%   numElementsX (variable): Number of elements in the x-direction.
+%   numElementsY (variable): Number of elements in the y-direction.
+%   lengthX (variable): Total domain length in the x-direction.
+%   lengthY (variable): Total domain length in the y-direction.
+%   xMin (variable): Minimum x-coordinate of the mesh domain.
+%   yMin (variable): Minimum y-coordinate of the mesh domain.
+% Outputs:
+%   connectivityMatrix_mat : Element connectivity matrix (nElements x nodesPerElement)
+%   xCoord_vec : Nodal x-coordinates of the mesh.
+%   yCoord_vec : Nodal y-coordinates of the mesh.
+function [connectivityMatrix_mat, xCoord_vec, yCoord_vec] = structuredMesh(numElementsX, numElementsY, lengthX, lengthY, xMin, yMin)
 
-    %% Connectivity Matrixs
+
+    %% Build the connectivity matrix
     
     numNodesX = numElementsX + 1;
     
@@ -15,10 +30,8 @@ function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElem
     connectivityMatrix_mat(:,2) = connectivityMatrix_mat(:,1) + 1;
     connectivityMatrix_mat(:,3) = connectivityMatrix_mat(:,2) + numNodesX;
     connectivityMatrix_mat(:,4) = connectivityMatrix_mat(:,3) - 1;
-    % temp = connectivityMatrix_mat(:,4);
-    % connectivityMatrix_mat(:,4) = connectivityMatrix_mat(:,3);
-    % connectivityMatrix_mat(:,3) = temp;
-    %% Grid generation
+    
+    %% Build the coordinate grid
     
     dX = lengthX /  numElementsX;
     dY = lengthY /  numElementsY;
@@ -32,15 +45,6 @@ function [connectivityMatrix_mat,xCoord_vec,yCoord_vec] = structuredMesh(numElem
     
     xCoord_vec = xCoord_mat(:)';
     yCoord_vec = yCoord_mat(:)';
-
-    %% Plotting
-    % figure;
-    % nodes = [connectivityMatrix_mat connectivityMatrix_mat(:,1)];
-    % plot(xCoord_vec(nodes)',yCoord_vec(nodes)','k')
-    % title('Mesh of Two Connected Rectangular Domains','Interpreter','latex')
-    % xlabel('X','Interpreter','latex')
-    % ylabel('Y','Interpreter','latex')
-    % axis equal
 
 
 end

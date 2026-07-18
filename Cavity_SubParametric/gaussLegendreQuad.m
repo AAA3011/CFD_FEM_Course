@@ -1,3 +1,11 @@
+% gaussLegendreQuad - Return Gauss�Legendre points and weights.
+%
+% Description: Return Gauss-Legendre quadrature points and weights
+% Inputs:
+%   numGaussPoints (variable): Number of Gauss points used per dimension
+% Outputs:
+%   gaussPoints_cvec : Gauss-Legendre quadrature points on [-1,1].
+%   gaussWeights_cvec : Gauss-Legendre quadrature weights.
 function [gaussPoints_cvec,gaussWeights_cvec] = gaussLegendreQuad(numGaussPoints)
     
     if numGaussPoints == 1
