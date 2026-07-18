@@ -1,6 +1,0 @@
-/* Created by mdot for Matlab */
-digraph m2html {
-
-  cavityPlot [URL="cavityPlot.html"];
-  plot [URL="plot.html"];
-}
