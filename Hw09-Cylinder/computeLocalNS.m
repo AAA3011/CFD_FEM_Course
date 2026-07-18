@@ -25,7 +25,7 @@
 %   vxrhs_col : Nodal v-velocity values.
 %   vyrhs_col : Nodal v-velocity values.
 function [urhs_col,vrhs_col,ReLocal,cfl,xCenter,yCenter,uxrhs_col,uyrhs_col,vxrhs_col,vyrhs_col] = computeLocalNS(elementData,unNodes_col,vnNodes_col,pressureSolution_col,Re,timeStep)
- 
+
     weights_pages         = elementData.weights;
     N_row_points_pages    = elementData.N_row;
     J_det_points_elev     = elementData.J_det;
@@ -36,7 +36,7 @@ function [urhs_col,vrhs_col,ReLocal,cfl,xCenter,yCenter,uxrhs_col,uyrhs_col,vxrh
     
     xphysCoord_vec = ElementPhysCoords_mat(:,1)';
     yphysCoord_vec = ElementPhysCoords_mat(:,2)';
- 
+
     unx_pages  = pagemtimes(dNdX_vec_pages,unNodes_col);
     uny_pages  = pagemtimes(dNdY_vec_pages,unNodes_col);
     vny_pages  = pagemtimes(dNdY_vec_pages,vnNodes_col);

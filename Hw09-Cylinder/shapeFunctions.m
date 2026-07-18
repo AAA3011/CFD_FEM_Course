@@ -1,10 +1,8 @@
 % shapeFunctions - Evaluate shape functions and natural derivatives.
 %
-% FILE: shapeFunctions.m
-% DESCRIPTION:
-% Computes shape functions N and derivatives (∂N/∂ξ, ∂N/∂η) in natural
-% coordinates for various element types (Truss, QUAD4/8/9, triangles, hex).
-% All Gauss points vectorized using page-wise operations.
+%
+% Supports multiple element types (Quad4, Quad8, Tri6, etc.) and evaluates
+% basis functions and their natural derivatives at provided natural coords.
 %
 % Inputs:
 %   n_ElementType (variable): Number of nodes in one element direction for the current element type.
@@ -13,6 +11,7 @@
 %   N_row_points_pages : Shape function values evaluated at Gauss points, stored page-wise.
 %   N_diff_rows_points_pages : Natural derivatives of shape functions at Gauss points.
 function [N_row_points_pages,N_diff_rows_points_pages]=shapeFunctions(n_ElementType,coords_row_pages)
+% Modified from the following
 % Created in Jan 2021 by CUFE AER-2021 Seniors:
 % Mahmoud Ahmed Moustafa, Mohamed Ahmed Ali, Ahmed Elrawy & Osama Mamdouh
 % For our Graduation Project, under the instruction and supervision of Dr. Ahmed Rashed
@@ -41,7 +40,6 @@ switch n_ElementType
 
         N_diff_rows_points_pages=[  1-eta_elev, 1+eta_elev, -(1+eta_elev), -(1-eta_elev)
                                   -(1+xi_elev),  1+xi_elev,     1-xi_elev,  -(1-xi_elev)]/4;
-
 
     case 2   %Quad8
         N_row_points_pages=[-1/4*(1+xi_elev).*(1-eta_elev).*(1-xi_elev+eta_elev)  ...
@@ -86,7 +84,7 @@ switch n_ElementType
         lamda_pages=1-xi_elev-eta_elev;
         N_row_points_pages=[-xi_elev.*(1-2*xi_elev) ...
                             4*xi_elev.*eta_elev ...
-                            -eta_elev.*(1-2*eta_elev) ...v
+                            -eta_elev.*(1-2*eta_elev) ...
                             4*eta_elev.*lamda_pages ...
                             -lamda_pages.*(1-2*lamda_pages) ...
                             4*xi_elev.*lamda_pages];
