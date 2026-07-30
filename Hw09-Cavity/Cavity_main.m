@@ -54,9 +54,19 @@ for elementNumber = 1:numElements
 end
 
 %% Build global matrices
-pK_mat   = zeros(totNumNodes,totNumNodes);
+numNodesPerEle = size(connectivityMatrix_mat, 2); 
+totalEntries   = numElements * (numNodesPerEle^2);
+
+% Preallocate triplet vectors for the sparse matrix
+I = zeros(totalEntries, 1);
+J = zeros(totalEntries, 1);
+V = zeros(totalEntries, 1);
+
 uMLV_col    = zeros(totNumNodes,1);
 vMLV_col    = zeros(totNumNodes,1);
+MLV_col     = zeros(totNumNodes,1);
+
+cnt = 0;
 
 for elementNumber = 1:numElements
 
