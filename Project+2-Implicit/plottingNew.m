@@ -109,7 +109,7 @@ for k = 1:nCases
     title(reLabels{k}, 'Interpreter','latex');
     set(ax,'XLim',[0 1],'YLim',[0 1],'TickDir','in');
 end
-set(fig, 'Color','none', 'InvertHardcopy','off');
+set(fig, 'Color','w', 'InvertHardcopy','off');
 print(fig, fullfile(outDir,'fig1_streamlines.svg'), '-dsvg', '-painters');
 fprintf('Saved fig1_streamlines.svg\n');
 
@@ -139,7 +139,7 @@ for k = 1:nCases
     title(reLabels{k}, 'Interpreter','latex');
     set(ax,'XLim',[0 1],'YLim',[0 1],'TickDir','in');
 end
-set(fig, 'Color','none', 'InvertHardcopy','off');
+set(fig, 'Color','w', 'InvertHardcopy','off');
 print(fig, fullfile(outDir,'fig2_speed.svg'), '-dsvg', '-painters');
 fprintf('Saved fig2_speed.svg\n');
 
@@ -167,7 +167,7 @@ for k = 1:nCases
     title(reLabels{k}, 'Interpreter','latex');
     set(ax,'XLim',[0 1],'YLim',[0 1],'TickDir','in');
 end
-set(fig, 'Color','none', 'InvertHardcopy','off');
+set(fig, 'Color','w', 'InvertHardcopy','off');
 print(fig, fullfile(outDir,'fig3_pressure.svg'), '-dsvg', '-painters');
 fprintf('Saved fig3_pressure.svg\n');
 
@@ -195,7 +195,7 @@ for k = 1:nCases
     title(reLabels{k}, 'Interpreter','latex');
     set(ax,'XLim',[0 1],'YLim',[0 1],'TickDir','in');
 end
-set(fig, 'Color','none', 'InvertHardcopy','off');
+set(fig, 'Color','w', 'InvertHardcopy','off');
 print(fig, fullfile(outDir,'fig4_u_contour.svg'), '-dsvg', '-painters');
 fprintf('Saved fig4_u_contour.svg\n');
 
@@ -223,7 +223,7 @@ for k = 1:nCases
     title(reLabels{k}, 'Interpreter','latex');
     set(ax,'XLim',[0 1],'YLim',[0 1],'TickDir','in');
 end
-set(fig, 'Color','none', 'InvertHardcopy','off');
+set(fig, 'Color','w', 'InvertHardcopy','off');
 print(fig, fullfile(outDir,'fig5_v_contour.svg'), '-dsvg', '-painters');
 fprintf('Saved fig5_v_contour.svg\n');
 
@@ -263,7 +263,7 @@ for k = 1:nCases
     set(ax,'YLim',[0 1],'TickDir','in');
     hold off;
 end
-set(fig, 'Color','none', 'InvertHardcopy','off');
+set(fig, 'Color','w', 'InvertHardcopy','off');
 print(fig, fullfile(outDir,'fig6_u_profile.svg'), '-dsvg', '-painters');
 fprintf('Saved fig6_u_profile.svg\n');
 
@@ -334,7 +334,7 @@ for k = 1:nCases
     hold off;
 end
 
-set(fig, 'Color','none', 'InvertHardcopy','off');
+set(fig, 'Color','w', 'InvertHardcopy','off');
 print(fig, fullfile(outDir,'fig7_newton_convergence.svg'), '-dsvg', '-painters');
 fprintf('Saved fig7_newton_convergence.svg\n');
 
